@@ -1,0 +1,12 @@
+#!/bin/bash
+
+left=$1
+right=$2
+gradient=$3
+out=$4
+
+pushd scripts
+
+bash runMatlabCmd  surf "'$left'" "'$right'" "'$gradient'" "'$out'"
+
+popd

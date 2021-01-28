@@ -1,0 +1,87 @@
+#!/bin/sh
+# script for execution of deployed applications
+#
+# Sets up the MATLAB Runtime environment for the current $ARCH and executes 
+# the specified command.
+#
+#MCRROOT and MCRBINS should be set in env already, below just for debugging
+#MCRBINS=$VASST_DEV_HOME/tools/mcr/v92
+#MCRROOT=/opt/mcr/v92
+
+chmod +x surf.m
+
+module load matlab
+
+searchpath=$PIPELINE_TOOL_DIR/matlab
+
+
+echo "------------------------------------------"
+if [ "x$1" = "x" ]; then
+  echo Usage:
+  echo    $0 \<function_name\> args
+  exit 0
+fi
+
+func_name=$1
+shift 1
+
+#if MCRROOT exists, and if compiled function exists, then use MCR:
+if [ -e "$MCRROOT" -a -e "$MCRBINS/$func_name" ]
+then
+  echo "Using MCR at $MCRROOT, running function $MCRBINS/$func_name"
+
+  
+  echo Setting up environment variables
+  echo ---
+  OLD_PATH=$LD_LIBRARY_PATH ## added this just in case matlab script uses system calls that then require external libs (i.e. calling fslval from genBYUtoNiftiTransformFromCroppedAnalyze)
+  LD_LIBRARY_PATH=.:${MCRROOT}/runtime/glnxa64 ;
+  LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MCRROOT}/bin/glnxa64 ;
+  LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MCRROOT}/sys/os/glnxa64;
+  LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MCRROOT}/sys/opengl/lib/glnxa64:$OLD_PATH;
+  export LD_LIBRARY_PATH;
+  echo LD_LIBRARY_PATH is ${LD_LIBRARY_PATH};
+
+#get args
+  args=
+  while [ $# -gt 0 ]; do
+      token=$1
+      args="${args} ${token}" 
+      shift
+  done
+ 
+  echo Running  "${MCRBINS}/${func_name} $args"
+
+
+  eval "\"${MCRBINS}/${func_name}\"" $args
+
+else 
+ #  if matlab exists, use matlab command line
+  matlab_path=`which matlab`
+  if [ -x $matlab_path ]
+  then 
+    echo "Using MATLAB command line to run $func_name"
+ 
+if [ "$#" -gt 0 ]
+then 
+ args=$1
+fi
+
+for i in `seq 2 $#`
+do
+ shift 1
+ token=$1
+ args="${args},${token}"
+done
+
+
+echo Running: matlab "$func_name($args)"
+ echo "addpath(genpath('$searchpath'));  $func_name($args); exit" | matlab -nosplash -nodesktop 
+
+  else
+  
+   #no way to run 
+   echo "MATLAB not installed, and compiled function $MCRBINS/$func_name does not exist"
+   
+  fi
+
+fi

@@ -1,0 +1,5 @@
+channels:
+  - py3
+
+dependancies:
+  - vtk = 8.1.2

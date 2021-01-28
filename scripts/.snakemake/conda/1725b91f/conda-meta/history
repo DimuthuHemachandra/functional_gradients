@@ -1,0 +1,3 @@
+==> 2020-05-10 00:10:57 <==
+# cmd: /home/ylu/anaconda3/bin/conda-env create --file /mnt/hgfs/project/Project_2/VTASN_3T/codes/.snakemake/conda/1725b91f.yaml --prefix /mnt/hgfs/project/Project_2/VTASN_3T/codes/.snakemake/conda/1725b91f
+# conda version: 4.8.3

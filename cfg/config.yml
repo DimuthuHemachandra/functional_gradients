@@ -1,0 +1,64 @@
+diffparc_dir: /home/dimuthu1/scratch/project2/derivatives/diffparc_dev
+
+participants_tsv: participants.tsv
+
+#HCP segmentations in subject native space:
+HCP_seg_nii: /home/dimuthu1/scratch/project2/derivatives/diffparc_3T_nodistcorr/work/sub-{subject}/labels/t1/HCP_native/HCP-MMP1.nii.gz
+
+Right_mat: matrices/Right/sub-{subject}_space-T1w_res-2_seed-CIT168_striatum-hcpmmp_connMap.mat
+Left_mat: matrices/Left/sub-{subject}_space-T1w_res-2_seed-CIT168_striatum-hcpmmp_connMap.mat
+
+
+stat_path_lh: /home/dimuthu1/scratch/project2/derivatives/hcp_360/work/MyWorkflow/_sub_id_{subject}/parce/out_put/{subject}/tables/table_lh.txt
+
+stat_path_rh: /home/dimuthu1/scratch/project2/derivatives/hcp_360/work/MyWorkflow/_sub_id_{subject}/parce/out_put/{subject}/tables/table_rh.txt
+
+
+surf_label_lh: /home/dimuthu1/scratch/project2/Project_2/cfg/surface_labels/mmpL.func.gii
+surf_label_rh: /home/dimuthu1/scratch/project2/Project_2/cfg/surface_labels/mmpR.func.gii
+
+HCP_360_labels: /home/dimuthu1/scratch/project2/Project_2/cfg/LUT_HCP-MMP1.txt
+
+#HCP_seg_nii: sub-{subject}/binary/sub-{subject}_exprater_{seed}_{hemi}_bin.nii.gz
+
+#ants transforms from template building - affine and warp are globbed
+ants_template_dir: /project/6007967/jclau/snsx32/templates/snsx32_v0.2/snsx32_v0.2_i09
+ants_affine_mat: snsx32_v0.2_i09sub-{subject}_acq-MP2RAGE_run-01_T1w*GenericAffine.mat
+ants_warp_nii: snsx32_v0.2_i09sub-{subject}_acq-MP2RAGE_run-01_T1w*[0-9]Warp.nii.gz
+ants_invwarp_nii: snsx32_v0.2_i09sub-{subject}_acq-MP2RAGE_run-01_T1w*[0-9]InverseWarp.nii.gz
+ants_ref_nii: snsx32_v0.2_i09template0.nii.gz
+
+#segmentation in template space for defining groupwise masks (should be same structure as seeds)
+template_seg_dir: /project/6007967/jclau/zona_OSF/OSF_nextrelease
+template: SNSX32NLin2020Asym
+template_seg_nii: sub-{template}_hemi-{hemi}_desc-{seed}_mask.nii.gz
+seeds:
+ - ZI
+ - ZIR
+hemis:
+ - L
+ - R
+
+
+#targets in subject native space
+targets_txt: cfg/hcp_mmp_sym_180.txt
+targets_seg_dir: /project/6007967/akhanf/cfmm-bids/data/Khan/SNSX_7T/deriv/freesurfer
+
+
+
+#fsl 6.0.1, ants; also:  mri_convert (from freesurfer) reg_resample (niftyreg) 
+singularity_neuroglia: /project/6007967/akhanf/singularity/bids-apps/khanlab_neuroglia-core_latest.sif 
+#singularity_neuroglia: docker://khanlab/neuroglia-core:latest  
+
+max_k: 12
+
+#tractography parameters
+probtrack:
+    seed_resolution: 0.7
+    nsamples: 10000
+    opts: '--loopcheck --onewaycondition --cthr=0.2 --nsteps=2000 --steplength=0.5  --fibthresh=0.01 --distthresh=0.0 --sampvox=0.0 --forcedir --opd --os2t --randfib=2' 
+
+
+enable_dropbox: False
+dropbox_token: insert_OAuth2_token_here
+
