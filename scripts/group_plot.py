@@ -24,7 +24,7 @@ def remove_outliers(df):
 	z_scores = zscore(df)
 
 	abs_z_scores = np.abs(z_scores)
-	filtered_entries = (abs_z_scores < 3).all(axis=1)
+	filtered_entries = (abs_z_scores < 2).all(axis=1)
 	new_df = df[filtered_entries]
 
 	return new_df
@@ -42,7 +42,8 @@ def drop_numerical_outliers(df, z_thresh=2):
 #make_out_dir(snakemake.params.stat_out_path)
 
 #hcp_dir = snakemake.input.hcp_path
-grad_dir = snakemake.input.grad_csv_path
+grad_12_dir = snakemake.input.grad_12_csv_path
+grad_24_dir = snakemake.input.grad_24_csv_path
 subj = snakemake.params.subj
 out_path = snakemake.params.out_path
 
@@ -55,26 +56,61 @@ out_path = snakemake.params.out_path
 
 #subj = ['3118','3119','3120']
 m12_L= []
+m24_L= []
 
-#grad_dir='/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/cortex/aligned_gradients/month12'
+#grad_12_dir='/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/cortex/aligned_gradients/month12'
+#grad_24_dir='/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/cortex/aligned_gradients/month24'
 #out_path='/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/cortex'
 
 
 for subjects in subj:
 
 	
-	grads = pd.read_csv(grad_dir+"/sub-"+subjects+"_L_gradients.csv")
-	gradient_lh = grads[['L_grad_1','L_grad_2','L_grad_3']]
+	grads12 = pd.read_csv(grad_12_dir+"/sub-"+subjects+"_L_gradients.csv")
+	gradient12_lh = grads12[['L_grad_1','L_grad_2','L_grad_3']]
 	#gradient_rh = grads[['R_grad_1','R_grad_2','R_grad_3']]
-	gradient_lh = gradient_lh.drop([0]).reset_index(drop=True)
+	gradient12_lh = gradient12_lh.drop([0]).reset_index(drop=True)
+	#gradient_rh = gradient_rh.drop([0]).reset_index(drop=True)
+	
+	
+	#gradient_lh = remove_outliers(gradient_lh)
+	m12_L.append(gradient12_lh)
+	gradient12_lh['month'] = 'm12'
+	
+	grads24 = pd.read_csv(grad_24_dir+"/sub-"+subjects+"_L_gradients.csv")
+	gradient24_lh = grads24[['L_grad_1','L_grad_2','L_grad_3']]
+	#gradient_rh = grads[['R_grad_1','R_grad_2','R_grad_3']]
+	gradient24_lh = gradient24_lh.drop([0]).reset_index(drop=True)
 	#gradient_rh = gradient_rh.drop([0]).reset_index(drop=True)
 	
 	#gradient_lh = remove_outliers(gradient_lh)
-	m12_L.append(gradient_lh)
+	m24_L.append(gradient24_lh)
+	gradient24_lh['month'] = 'm24'
+	
+	df_subj = gradient24_lh.append(gradient12_lh)
+	sns_plot = sns.scatterplot(data = df_subj, x='L_grad_1',y='L_grad_2', hue="month")
+	plt.savefig(out_path+"/group_"+subjects+"_stat_L.png")
+	plt.close()
 
 
 
-df_L = pd.concat(m12_L)
+df_12_L = pd.concat(m12_L)
+#df_12_L = remove_outliers(df_12_L)
+
+df_12_L['month'] = 'm12'
+
+df_24_L = pd.concat(m24_L)
+#df_24_L = remove_outliers(df_24_L)
+
+df_24_L['month'] = 'm24'
+
+print(df_12_L)
+
+df_all = df_24_L.append(df_12_L)
+
+print(df_all)
+
+
 #drop_numerical_outliers(df_L)
 #df_L = remove_outliers(df_L)
 
@@ -82,18 +118,20 @@ df_L = pd.concat(m12_L)
 #drop_numerical_outliers(df_R)
 #df_R = remove_outliers(df_R)
 
-df_L.to_csv(out_path+'/all_stat_L.csv', index=False)
+#df_all.to_csv(out_path+'/all_stat_L.csv', index=False)
 #df_R.to_csv(out_path+'/all_stat_R.csv', index=False)
 
-print(df_L)
+
 #print(df_R)
 #sns.color_palette("viridis", as_cmap=True)
-sns_plot_L = sns.pairplot(df_L,plot_kws={"s": 5})
+sns_plot_L = sns.pairplot(df_all,plot_kws={"s": 5}, hue="month")
 #sns_plot_R = sns.pairplot(df_R, plot_kws={"s": 8}, hue="group")
 #plt.show()
 sns_plot_L.savefig(out_path+"/group_stat_L.png")
 #sns_plot_R.savefig(out_path+"/group_stat_R.png")
-#plt.show()
+plt.show()
+
+
 
 """
 plt.clf()
