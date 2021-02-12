@@ -60,8 +60,9 @@ def grad_calculater(bold_file):
     timeseries = cii.get_fdata()
 
     #cleaning data
-    confounds = Params36().load(bold_file)
-    clean_ts = signal.clean(timeseries, confounds=confounds)
+    #confounds = Params36().load(bold_file)
+    #clean_ts = signal.clean(timeseries, confounds=confounds)
+    clean_ts = timeseries
 
     atlas_L = nib.load('/scratch/dimuthu1/PPMI_project2/PPMI_gradients/cfg/L.atlasroi.32k_fs_LR.shape.gii')
     atlas_L = atlas_L.darrays[0].data
@@ -121,7 +122,7 @@ def grad_calculater(bold_file):
 
     #slicing out hemisphere vs subcrtx connectivity. Basically removing cortext vs cortex connectivity
     sliced_L_matrix = correlation_L_matrix[:500,1000:]
-    sliced_R_matrix = correlation_R_matrix[:500,1000:]
+    sliced_R_matrix = correlation_R_matrix[500:1000,1000:]
 
     sliced_ctx_L_matrix = correlation_ctx_matrix[:500,:500]
     sliced_ctx_R_matrix = correlation_ctx_matrix[500:,500:]

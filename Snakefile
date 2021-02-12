@@ -23,11 +23,14 @@ diffparc_dir = config['diffparc_dir']
 
 rule all:
     input: 
-    	L_emb_12 = expand('../derivatives/analysis/cortex/gradients/month12/sub-{subject}_L_gradients.csv',subject=subjects),
-    	L_emb_24 = expand('../derivatives/analysis/cortex/gradients/month24/sub-{subject}_L_gradients.csv',subject=subjects),
+        #cleaned_dts_12 = expand('../derivatives/clean_dtseries/sub-{subject}_Month12_clean.dtseries.nii',subject=subjects),
+        #cleaned_dts_24 = expand('../derivatives/clean_dtseries/sub-{subject}_Month24_clean.dtseries.nii',subject=subjects),
+    	#L_emb_12 = expand('../derivatives/analysis/cortex/gradients/month12/sub-{subject}_L_gradients.csv',subject=subjects),
+    	#L_emb_24 = expand('../derivatives/analysis/cortex/gradients/month24/sub-{subject}_L_gradients.csv',subject=subjects)
     	#aligned_grads_12 = expand('../derivatives/analysis/cortex/aligned_gradients/month12/sub-{subject}_L_gradients.csv',subject=subjects),
     	#aligned_grads_24 = expand('../derivatives/analysis/cortex/aligned_gradients/month24/sub-{subject}_L_gradients.csv',subject=subjects),
-    	Group_plot_L = '../derivatives/analysis/cortex/group_analysis/subjects/group_stat_L.png'
+    	Group_plot_L = '../derivatives/analysis/cortex/group_analysis/subjects/group_stat_L.png',
+        Group_plot_ctx = '../derivatives/analysis/cortex/group_analysis/subjects/group_stat_L_ctx.png',
         #clusters = expand('../derivatives/analysis/cortex/gradients/sub-{subject}/gradient_{componant}_image.nii.gz',subject=subjects, componant=componants),
         #file_test = expand('/home/dimuthu1/scratch/project2/derivatives/analysis/cortex/gradients/sub-{subject}/surfaces/plotL_grad_{componant}.func.gii',subject=subjects, componant=componants),
         #files_lh = expand('../derivatives/analysis/cortex/hcp_stat/sub-{subject}/{subject}_hcp_all_stat_lh.png',subject=subjects),
@@ -42,9 +45,26 @@ rule all:
         
 
 #subjects='CT01'
+rule clean_dtseries_m12: 
+    input: bold = '../derivatives/fmriprep_20_2_1_syn_sdc/fmriprep/sub-{subject}/ses-Month12/func/sub-{subject}_ses-Month12_task-rest_run-1_space-fsLR_den-91k_bold.dtseries.nii',
+    	   tsv = '../derivatives/fmriprep_20_2_1_syn_sdc/fmriprep/sub-{subject}/ses-Month12/func/sub-{subject}_ses-Month12_task-rest_run-1_desc-confounds_timeseries.tsv' 
+           
+    output: cleaned = '../derivatives/clean_dtseries/sub-{subject}_Month12_clean.dtseries.nii', 
+
+    group: 'pre_align'
+    shell: 'singularity exec $SINGULARITY_DIR/bids-apps/tigrlab_fmriprep_ciftify_v1.3.2-2.3.3.sif ciftify_clean_img --output-file={output.cleaned} --confounds-tsv={input.tsv} --clean-config=cfg/cleaning_ciftify.json {input.bold}'
+
+rule clean_dtseries_m24: 
+    input: bold = '../derivatives/fmriprep_20_2_1_syn_sdc/fmriprep/sub-{subject}/ses-Month24/func/sub-{subject}_ses-Month24_task-rest_run-1_space-fsLR_den-91k_bold.dtseries.nii',
+    	   tsv = '../derivatives/fmriprep_20_2_1_syn_sdc/fmriprep/sub-{subject}/ses-Month24/func/sub-{subject}_ses-Month24_task-rest_run-1_desc-confounds_timeseries.tsv' 
+           
+    output: cleaned = '../derivatives/clean_dtseries/sub-{subject}_Month24_clean.dtseries.nii', 
+
+    group: 'pre_align'
+    shell: 'singularity exec $SINGULARITY_DIR/bids-apps/tigrlab_fmriprep_ciftify_v1.3.2-2.3.3.sif ciftify_clean_img --output-file={output.cleaned} --confounds-tsv={input.tsv} --clean-config=cfg/cleaning_ciftify.json {input.bold}'
 
 rule get_gradients_month12: 
-    input: bold = '../derivatives/fmriprep_20_2_1_syn_sdc/fmriprep/sub-{subject}/ses-Month12/func/sub-{subject}_ses-Month12_task-rest_run-1_space-fsLR_den-91k_bold.dtseries.nii',
+    input: bold = '../derivatives/clean_dtseries/sub-{subject}_Month12_clean.dtseries.nii',
     	   gradient_path = '../derivatives/analysis/cortex/gradients/month12' 
            
     output: gradient = '../derivatives/analysis/cortex/gradients/month12/sub-{subject}_L_gradients.csv', 
@@ -58,7 +78,7 @@ rule get_gradients_month12:
     script: 'scripts/get_gradients.py'
     
 rule get_gradients_month24: 
-    input: bold = '../derivatives/fmriprep_20_2_1_syn_sdc/fmriprep/sub-{subject}/ses-Month24/func/sub-{subject}_ses-Month24_task-rest_run-1_space-fsLR_den-91k_bold.dtseries.nii',
+    input: bold = '../derivatives/clean_dtseries/sub-{subject}_Month24_clean.dtseries.nii',
     	   gradient_path = '../derivatives/analysis/cortex/gradients/month24' 
            
     output: gradient = '../derivatives/analysis/cortex/gradients/month24/sub-{subject}_L_gradients.csv', 
@@ -106,7 +126,19 @@ rule get_group_plots:
 
     group: 'group_analysis'
     script: 'scripts/group_plot.py'
-    
+
+rule get_group_plots_ctx:
+    input:  grad_12_csv_path = directory('../derivatives/analysis/cortex/gradients/month12'),
+            grad_24_csv_path = directory('../derivatives/analysis/cortex/gradients/month24')
+                
+    params: subj = subjects,
+            out_path = '../derivatives/analysis/cortex/group_analysis/subjects'
+
+    output: aligned_grads = '../derivatives/analysis/cortex/group_analysis/subjects/group_stat_L_ctx.png'
+
+    group: 'group_analysis'
+    script: 'scripts/group_plot_ctx.py'
+
 """
 rule get_projections:
     input: gradient_csv = "../derivatives/analysis/cortex/gradients/sub-{subject}/sub-{subject}_gradients.csv",

@@ -1,0 +1,23 @@
+{
+    "--right-surface": null,
+    "--low-pass": "0.08",
+    "--drop-dummy-TRs": "5",
+    "--cf-cols": "trans_x,trans_y,trans_z,rot_x,rot_y,rot_z,csf,white_matter",
+    "--help": false,
+    "--high-pass": "0.009",
+    "--tr": "2.40",
+    "--output-file": "test.dtseries.nii",
+    "--cf-td-cols": "trans_x,trans_y,trans_z,rot_x,rot_y,rot_z",
+    "--left-surface": null,
+    "--cf-sq-cols": "trans_x,trans_y,trans_z,rot_x,rot_y,rot_z",
+    "--debug": false,
+    "--confounds-tsv": "sub-3118_ses-Month12_task-rest_run-1_desc-confounds_timeseries.tsv",
+    "--cf-sqtd-cols": "trans_x,trans_y,trans_z,rot_x,rot_y,rot_z",
+    "<func_input>": "sub-3118_ses-Month12_task-rest_run-1_space-fsLR_den-91k_bold.dtseries.nii",
+    "--standardize": false,
+    "--detrend": false,
+    "--verbose": true,
+    "--no-cleaning": false,
+    "--clean-config": "ciftify_cleaning.json",
+    "--smooth-fwhm": null
+}
