@@ -29,8 +29,10 @@ rule all:
     	#L_emb_24 = expand('../derivatives/analysis/cortex/gradients/month24/sub-{subject}_L_gradients.csv',subject=subjects)
     	#aligned_grads_12 = expand('../derivatives/analysis/cortex/aligned_gradients/month12/sub-{subject}_L_gradients.csv',subject=subjects),
     	#aligned_grads_24 = expand('../derivatives/analysis/cortex/aligned_gradients/month24/sub-{subject}_L_gradients.csv',subject=subjects),
-    	Group_plot_L = '../derivatives/analysis/cortex/group_analysis/subjects/group_stat_L.png',
-        Group_plot_ctx = '../derivatives/analysis/cortex/group_analysis/subjects/group_stat_L_ctx.png',
+        aligned_grads_12 = expand('../derivatives/analysis/gradients/month12/sub-{subject}_gradients.csv',subject=subjects),
+    	aligned_grads_24 = expand('../derivatives/analysis/gradients/month24/sub-{subject}_gradients.csv',subject=subjects),
+    	#Group_plot_sbctx = expand('../derivatives/analysis/plots/subjects/sub-{subject}_stat_sbctx.png',subject=subjects),
+        #Group_plot_ctx = expand('../derivatives/analysis/plots/subjects/sub-{subject}_stat_ctx.png',subject=subjects)
         #clusters = expand('../derivatives/analysis/cortex/gradients/sub-{subject}/gradient_{componant}_image.nii.gz',subject=subjects, componant=componants),
         #file_test = expand('/home/dimuthu1/scratch/project2/derivatives/analysis/cortex/gradients/sub-{subject}/surfaces/plotL_grad_{componant}.func.gii',subject=subjects, componant=componants),
         #files_lh = expand('../derivatives/analysis/cortex/hcp_stat/sub-{subject}/{subject}_hcp_all_stat_lh.png',subject=subjects),
@@ -65,31 +67,27 @@ rule clean_dtseries_m24:
 
 rule get_gradients_month12: 
     input: bold = '../derivatives/clean_dtseries/sub-{subject}_Month12_clean.dtseries.nii',
-    	   gradient_path = '../derivatives/analysis/cortex/gradients/month12' 
+    params: gradient_path = '../derivatives/analysis/gradients/month12' 
            
-    output: gradient = '../derivatives/analysis/cortex/gradients/month12/sub-{subject}_L_gradients.csv', 
-            L_sbctx_matrix = '../derivatives/analysis/cortex/gradients/month12/sub-{subject}_L_sbctx.npy',
-            R_sbctx_matrix = '../derivatives/analysis/cortex/gradients/month12/sub-{subject}_R_sbctx.npy',
-            L_ctx_matrix = '../derivatives/analysis/cortex/gradients/month12/sub-{subject}_L_ctx.npy',
-            R_ctx_matrix = '../derivatives/analysis/cortex/gradients/month12/sub-{subject}_R_ctx.npy'
+    output: gradient = '../derivatives/analysis/gradients/month12/sub-{subject}_gradients.csv', 
+            sbctx_matrix = '../derivatives/analysis/gradients/month12/sub-{subject}_sbctx.npy',
+            ctx_matrix = '../derivatives/analysis/gradients/month12/sub-{subject}_ctx.npy'
 
     #conda: 'cfg/bspace.yml'
     group: 'pre_align'
-    script: 'scripts/get_gradients.py'
+    script: 'scripts/get_gradients_whole.py'
     
 rule get_gradients_month24: 
     input: bold = '../derivatives/clean_dtseries/sub-{subject}_Month24_clean.dtseries.nii',
-    	   gradient_path = '../derivatives/analysis/cortex/gradients/month24' 
+    params: gradient_path = '../derivatives/analysis/gradients/month24' 
            
-    output: gradient = '../derivatives/analysis/cortex/gradients/month24/sub-{subject}_L_gradients.csv', 
-            L_sbctx_matrix = '../derivatives/analysis/cortex/gradients/month24/sub-{subject}_L_sbctx.npy',
-            R_sbctx_matrix = '../derivatives/analysis/cortex/gradients/month24/sub-{subject}_R_sbctx.npy',
-            L_ctx_matrix = '../derivatives/analysis/cortex/gradients/month24/sub-{subject}_L_ctx.npy',
-            R_ctx_matrix = '../derivatives/analysis/cortex/gradients/month24/sub-{subject}_R_ctx.npy'
+    output: gradient = '../derivatives/analysis/gradients/month24/sub-{subject}_gradients.csv', 
+            sbctx_matrix = '../derivatives/analysis/gradients/month24/sub-{subject}_sbctx.npy',
+            ctx_matrix = '../derivatives/analysis/gradients/month24/sub-{subject}_ctx.npy'
 
     #conda: 'cfg/bspace.yml'
     group: 'pre_align'
-    script: 'scripts/get_gradients.py'
+    script: 'scripts/get_gradients_whole.py'
 
 rule group_align_12:
     input: grads_path = '../derivatives/analysis/cortex/gradients/month12'
@@ -116,28 +114,19 @@ rule group_align_24:
     script: 'scripts/procrust.py'
     
 rule get_group_plots:
-    input:  grad_12_csv_path = directory('../derivatives/analysis/cortex/gradients/month12'),
-    	    grad_24_csv_path = directory('../derivatives/analysis/cortex/gradients/month24')
+    input:  grad_12_csv_path = directory('../derivatives/analysis/gradients/month12'),
+    	    grad_24_csv_path = directory('../derivatives/analysis/gradients/month24')
                  
     params: subj = subjects,
-            out_path = '../derivatives/analysis/cortex/group_analysis/subjects'
+            out_path = '../derivatives/analysis/plots/subjects'
 
-    output: aligned_grads = '../derivatives/analysis/cortex/group_analysis/subjects/group_stat_L.png'
+    output: plots_sbctx = expand('../derivatives/analysis/plots/subjects/sub-{subject}_stat_sbctx.png',subject=subjects),
+            plots_ctx = expand('../derivatives/analysis/plots/subjects/sub-{subject}_stat_ctx.png',subject=subjects)
 
     group: 'group_analysis'
     script: 'scripts/group_plot.py'
 
-rule get_group_plots_ctx:
-    input:  grad_12_csv_path = directory('../derivatives/analysis/cortex/gradients/month12'),
-            grad_24_csv_path = directory('../derivatives/analysis/cortex/gradients/month24')
-                
-    params: subj = subjects,
-            out_path = '../derivatives/analysis/cortex/group_analysis/subjects'
 
-    output: aligned_grads = '../derivatives/analysis/cortex/group_analysis/subjects/group_stat_L_ctx.png'
-
-    group: 'group_analysis'
-    script: 'scripts/group_plot_ctx.py'
 
 """
 rule get_projections:

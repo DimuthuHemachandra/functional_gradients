@@ -47,128 +47,61 @@ grad_24_dir = snakemake.input.grad_24_csv_path
 subj = snakemake.params.subj
 out_path = snakemake.params.out_path
 
-
+make_out_dir(out_path)
 
 #myelin_lh = pd.read_csv("test_materials/hcp_360/sub-CT01/CT01_mean_myelin_R.txt", names = ['myelin'])
 
 #print(myelin_lh)
 
+def get_plots(region, grad_12_dir, grad_24_dir):
 
-#subj = ['3118','3119','3120']
-m12_L= []
-m24_L= []
-
-m12_R= []
-m24_R= []
-
-#grad_12_dir='/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/cortex/aligned_gradients/month12'
-#grad_24_dir='/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/cortex/aligned_gradients/month24'
-#out_path='/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/cortex'
+	#subj = ['3118','3119','3120']
+	m12= []
+	m24= []
 
 
-for subjects in subj:
+	#grad_12_dir='/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/cortex/aligned_gradients/month12'
+	#grad_24_dir='/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/cortex/aligned_gradients/month24'
+	#out_path='/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/cortex'
 
+
+	for subjects in subj:
+
+		
+		grads12 = pd.read_csv(grad_12_dir+"/sub-"+subjects+"_gradients.csv")
+		gradient12 = grads12[[region+'_grad_1',region+'_grad_2',region+'_grad_3']]
+
+		gradient12 = gradient12.drop([0]).reset_index(drop=True)
+
+		#gradient_lh = remove_outliers(gradient_lh)
+		m12.append(gradient12)
+		gradient12['month'] = 'm12'
+
+		
+		grads24 = pd.read_csv(grad_24_dir+"/sub-"+subjects+"_gradients.csv")
+		gradient24 = grads24[[region+'_grad_1',region+'_grad_2',region+'_grad_3']]
+
+		gradient24 = gradient24.drop([0]).reset_index(drop=True)
 	
-	grads12 = pd.read_csv(grad_12_dir+"/sub-"+subjects+"_L_gradients.csv")
-	gradient12_lh = grads12[['L_grad_1','L_grad_2','L_grad_3']]
-	gradient12_rh = grads12[['R_grad_1','R_grad_2','R_grad_3']]
-	gradient12_lh = gradient12_lh.drop([0]).reset_index(drop=True)
-	gradient12_rh = gradient12_rh.drop([0]).reset_index(drop=True)
-	
-	
-	#gradient_lh = remove_outliers(gradient_lh)
-	m12_L.append(gradient12_lh)
-	gradient12_lh['month'] = 'm12'
+		
+		#gradient_lh = remove_outliers(gradient_lh)
+		m24.append(gradient24)
+		gradient24['month'] = 'm24'
 
-	m12_R.append(gradient12_rh)
-	gradient12_rh['month'] = 'm12'
-	
-	grads24 = pd.read_csv(grad_24_dir+"/sub-"+subjects+"_L_gradients.csv")
-	gradient24_lh = grads24[['L_grad_1','L_grad_2','L_grad_3']]
-	gradient24_rh = grads24[['R_grad_1','R_grad_2','R_grad_3']]
-	gradient24_lh = gradient24_lh.drop([0]).reset_index(drop=True)
-	gradient24_rh = gradient24_rh.drop([0]).reset_index(drop=True)
-	
-	#gradient_lh = remove_outliers(gradient_lh)
-	m24_L.append(gradient24_lh)
-	gradient24_lh['month'] = 'm24'
-
-	m24_R.append(gradient24_rh)
-	gradient24_rh['month'] = 'm24'
-	
-	df_subj = gradient24_lh.append(gradient12_lh)
-	sns_plot = sns.scatterplot(data = df_subj, x='L_grad_1',y='L_grad_2', hue="month")
-	plt.savefig(out_path+"/group_"+subjects+"_stat_L.png")
-	plt.close()
-
-	df_subj = gradient24_rh.append(gradient12_rh)
-	sns_plot = sns.scatterplot(data = df_subj, x='R_grad_1',y='R_grad_2', hue="month")
-	plt.savefig(out_path+"/group_"+subjects+"_stat_R.png")
-	plt.close()
+		
+		df_subj = gradient24.append(gradient12)
+		sns_plot = sns.scatterplot(data = df_subj, x=region+'_grad_1',y=region+'_grad_2', hue="month")
+		plt.savefig(out_path+"/group_"+subjects+"_stat_"+region+".png")
+		plt.close()
 
 
 
-df_12_L = pd.concat(m12_L)
-#df_12_L = remove_outliers(df_12_L)
-df_12_L['month'] = 'm12'
-df_24_L = pd.concat(m24_L)
-#df_24_L = remove_outliers(df_24_L)
-df_24_L['month'] = 'm24'
-print(df_12_L)
-df_all_L = df_24_L.append(df_12_L)
-print(df_all_L)
-df_all_L.to_csv(out_path+'/all_stat_L.csv', index=False)
+get_plots('ctx', grad_12_dir, grad_24_dir)
+get_plots('sbctx', grad_12_dir, grad_24_dir)
 
 
 
-df_12_R = pd.concat(m12_R)
-#df_12_L = remove_outliers(df_12_L)
-df_12_R['month'] = 'm12'
-df_24_R = pd.concat(m24_R)
-#df_24_L = remove_outliers(df_24_L)
-df_24_R['month'] = 'm24'
-print(df_12_R)
-df_all_R = df_24_R.append(df_12_R)
-print(df_all_R)
-df_all_R.to_csv(out_path+'/all_stat_R.csv', index=False)
 
-
-#print(df_R)
-#sns.color_palette("viridis", as_cmap=True)
-sns_plot_L = sns.pairplot(df_all_L,plot_kws={"s": 5}, hue="month")
-#sns_plot_R = sns.pairplot(df_R, plot_kws={"s": 8}, hue="group")
-#plt.show()
-sns_plot_L.savefig(out_path+"/group_stat_L.png")
-#sns_plot_R.savefig(out_path+"/group_stat_R.png")
-#plt.show()
-
-
-#sns.color_palette("viridis", as_cmap=True)
-sns_plot_R = sns.pairplot(df_all_R,plot_kws={"s": 5}, hue="month")
-#sns_plot_R = sns.pairplot(df_R, plot_kws={"s": 8}, hue="group")
-#plt.show()
-sns_plot_R.savefig(out_path+"/group_stat_R.png")
-#sns_plot_R.savefig(out_path+"/group_stat_R.png")
-#plt.show()
-
-
-"""
-plt.clf()
-
-#sns.color_palette("viridis", as_cmap=True)
-ct_df = df_L.loc[df_L['group'] == 'CT']
-ct_df = ct_df.drop(['group'], axis = 1)
-sns_plot_ct = sns.heatmap(ct_df.corr(), annot=True)
-sns_plot_ct.figure.savefig(out_path+"/ct_L_heatmap.png")
-
-plt.clf()
-
-
-PD_df = df_L.loc[df_L['group'] == 'PD']
-PD_df = PD_df.drop(['group'], axis = 1)
-sns_plot_PD = sns.heatmap(PD_df.corr(), annot=True)
-sns_plot_PD.figure.savefig(out_path+"/PD_L_heatmap.png")
-"""
 
 
 
