@@ -25,12 +25,14 @@ rule all:
     input: 
         #cleaned_dts_12 = expand('../derivatives/clean_dtseries/sub-{subject}_Month12_clean.dtseries.nii',subject=subjects),
         #cleaned_dts_24 = expand('../derivatives/clean_dtseries/sub-{subject}_Month24_clean.dtseries.nii',subject=subjects),
+        cor_matrix_12 = expand('../derivatives/analysis/corr_matrix/month12/sub-{subject}_month12_corr-matrix.npy',subject=subjects),
+        cor_matrix_24 = expand('../derivatives/analysis/corr_matrix/month24/sub-{subject}_month24_corr-matrix.npy',subject=subjects)
     	#L_emb_12 = expand('../derivatives/analysis/cortex/gradients/month12/sub-{subject}_L_gradients.csv',subject=subjects),
     	#L_emb_24 = expand('../derivatives/analysis/cortex/gradients/month24/sub-{subject}_L_gradients.csv',subject=subjects)
     	#aligned_grads_12 = expand('../derivatives/analysis/cortex/aligned_gradients/month12/sub-{subject}_L_gradients.csv',subject=subjects),
     	#aligned_grads_24 = expand('../derivatives/analysis/cortex/aligned_gradients/month24/sub-{subject}_L_gradients.csv',subject=subjects),
-        aligned_grads_12 = expand('../derivatives/analysis/gradients/month12/sub-{subject}_gradients.csv',subject=subjects),
-    	aligned_grads_24 = expand('../derivatives/analysis/gradients/month24/sub-{subject}_gradients.csv',subject=subjects),
+        #aligned_grads_12 = expand('../derivatives/analysis/gradients/month12/sub-{subject}_gradients.csv',subject=subjects),
+    	#aligned_grads_24 = expand('../derivatives/analysis/gradients/month24/sub-{subject}_gradients.csv',subject=subjects),
     	#Group_plot_sbctx = expand('../derivatives/analysis/plots/subjects/sub-{subject}_stat_sbctx.png',subject=subjects),
         #Group_plot_ctx = expand('../derivatives/analysis/plots/subjects/sub-{subject}_stat_ctx.png',subject=subjects)
         #clusters = expand('../derivatives/analysis/cortex/gradients/sub-{subject}/gradient_{componant}_image.nii.gz',subject=subjects, componant=componants),
@@ -57,13 +59,39 @@ rule clean_dtseries_m12:
     shell: 'singularity exec $SINGULARITY_DIR/bids-apps/tigrlab_fmriprep_ciftify_v1.3.2-2.3.3.sif ciftify_clean_img --output-file={output.cleaned} --confounds-tsv={input.tsv} --clean-config=cfg/cleaning_ciftify.json {input.bold}'
 
 rule clean_dtseries_m24: 
-    input: bold = '../derivatives/fmriprep_20_2_1_syn_sdc/fmriprep/sub-{subject}/ses-Month24/func/sub-{subject}_ses-Month24_task-rest_run-1_space-fsLR_den-91k_bold.dtseries.nii',
+    input: cleaned_bold = '../derivatives/fmriprep_20_2_1_syn_sdc/fmriprep/sub-{subject}/ses-Month24/func/sub-{subject}_ses-Month24_task-rest_run-1_space-fsLR_den-91k_bold.dtseries.nii',
     	   tsv = '../derivatives/fmriprep_20_2_1_syn_sdc/fmriprep/sub-{subject}/ses-Month24/func/sub-{subject}_ses-Month24_task-rest_run-1_desc-confounds_timeseries.tsv' 
            
     output: cleaned = '../derivatives/clean_dtseries/sub-{subject}_Month24_clean.dtseries.nii', 
 
     group: 'pre_align'
     shell: 'singularity exec $SINGULARITY_DIR/bids-apps/tigrlab_fmriprep_ciftify_v1.3.2-2.3.3.sif ciftify_clean_img --output-file={output.cleaned} --confounds-tsv={input.tsv} --clean-config=cfg/cleaning_ciftify.json {input.bold}'
+
+rule get_corr_matrix_12: 
+    input: cleaned_bold = '../derivatives/clean_dtseries/sub-{subject}_Month12_clean.dtseries.nii'
+
+    params: out_path = '../derivatives/analysis/corr_matrix/month12' 
+           
+    output: corr_matrix = '../derivatives/analysis/corr_matrix/month12/sub-{subject}_month12_corr-matrix.npy' 
+
+    group: 'pre_align'
+
+    script: 'scripts/get_correlation.py'
+    
+rule get_corr_matrix_24: 
+    input: cleaned_bold = '../derivatives/clean_dtseries/sub-{subject}_Month24_clean.dtseries.nii'
+
+    params: out_path = '../derivatives/analysis/corr_matrix/month24'
+           
+    output: corr_matrix = '../derivatives/analysis/corr_matrix/month24/sub-{subject}_month24_corr-matrix.npy' 
+
+    group: 'pre_align'
+
+    script: 'scripts/get_correlation.py'
+
+
+
+
 
 rule get_gradients_month12: 
     input: bold = '../derivatives/clean_dtseries/sub-{subject}_Month12_clean.dtseries.nii',
