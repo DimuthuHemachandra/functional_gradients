@@ -2,6 +2,7 @@ import pandas as pd
 import os
 import glob
 import io 
+import dill
 import numpy as np
 import matplotlib.pyplot as plt
 import nibabel as nib
@@ -15,12 +16,26 @@ from brainspace.utils.parcellation import map_to_labels
 from sklearn.metrics.pairwise import cosine_similarity
 
 
-df = pd.read_table('../participants.tsv')
+"""df = pd.read_table('../participants.tsv')
 subjects = df.participant_id.to_list() 
-subj = [ s.strip('sub-') for s in subjects ]
+subj = [ s.strip('sub-') for s in subjects ]"""
 
-labels_gii = nib.load('../cfg/Schaefer2018_1000Parcels_7Networks_order.dlabel.nii').get_fdata()
-mask = ~np.isin(labels_gii[0],0)
+subj = snakemake.params.subjects
+
+#labels_gii = nib.load('/scratch/dimuthu1/PPMI_project2/PPMI_gradients/cfg/Schaefer2018_1000Parcels_7Networks_order.dlabel.nii').get_fdata()
+#mask = ~np.isin(labels_gii[0],0)
+
+def make_out_dir(out_path):
+
+	#Make subdirectories to save files
+	filename = out_path
+	if not os.path.exists(os.path.dirname(filename)):
+	    try:
+	        os.makedirs(os.path.dirname(filename))
+	    except OSError as exc: # Guard against race condition
+	        if exc.errno != errno.EEXIST:
+	          raise
+
 
 
 def get_gradients(matrix,region):
@@ -84,11 +99,11 @@ def get_aligned_gradients(correlation_mean, correlation_matrix):
 
     return gm,grad_aligned
 
-def get_mean_matrix(session,region):
+def get_mean_matrix(session,region,matrix_files):
     #subj = ['3119','3120']
-    matrix_dir = '/home/dimuthu1/temporay_scratch/PPMI_project2/derivatives/analysis/corr_matrix/'+session
+    #matrix_dir = '/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/smoothed/corr_matrix/'+session
 
-    matrix = np.load(matrix_dir+"/sub-"+subj[0]+"_"+session+"_corr-matrix.npy")
+    matrix = np.load(matrix_files[0]) #np.load(matrix_dir+"/sub-"+subj[0]+"_"+session+"_corr-matrix.npy")
 
     if region=='ctx':
         sliced_matrix = matrix[:1000,:1000]
@@ -102,9 +117,9 @@ def get_mean_matrix(session,region):
     cube_matrix = np.zeros((np.shape(sliced_matrix)[0],np.shape(sliced_matrix)[1],len(subj)))
 
     
-    for i,subjects in enumerate(subj):
+    for i,matrix_file in enumerate(matrix_files):
         
-        matrix = np.load(matrix_dir+"/sub-"+subjects+"_"+session+"_corr-matrix.npy")
+        matrix = np.load(matrix_file) #np.load(matrix_dir+"/sub-"+subjects+"_"+session+"_corr-matrix.npy")
 
         if region=='ctx':
             sliced_matrix = matrix[:1000,:1000]
@@ -126,58 +141,48 @@ def get_mean_matrix(session,region):
 
 
 
+matrix_files = snakemake.input.matrix_files
+month = snakemake.params.month
+make_out_dir(snakemake.params.grad_path)
 
 
-mean_ctx_12, cube_matrix_ctx_12 = get_mean_matrix('month12','ctx')
-mean_ctx_24, cube_matrix_ctx_24 = get_mean_matrix('month24','ctx')
+mean_ctx, cube_matrix_ctx = get_mean_matrix(month,'ctx',matrix_files)
+mean_sbctx_L, cube_matrix_sbctx_L= get_mean_matrix(month,'sbctx_L',matrix_files)
+mean_sbctx_R, cube_matrix_sbctx_R= get_mean_matrix(month,'sbctx_R',matrix_files)
 
-mean_sbctx_L_12, cube_matrix_sbctx_L_12= get_mean_matrix('month12','sbctx_L')
-mean_sbctx_L_24, cube_matrix_sbctx_L_24 = get_mean_matrix('month24','sbctx_L')
+grad_ctx, aligned_grad_ctx = get_aligned_gradients(mean_ctx, cube_matrix_ctx)
+grad_sbctx_L, aligned_grad_sbctx_L = get_aligned_gradients(mean_sbctx_L, cube_matrix_sbctx_L)
+grad_sbctx_R, aligned_grad_sbctx_R = get_aligned_gradients(mean_sbctx_R, cube_matrix_sbctx_R)
 
-mean_sbctx_R_12, cube_matrix_sbctx_R_12= get_mean_matrix('month12','sbctx_R')
-mean_sbctx_R_24, cube_matrix_sbctx_R_24 = get_mean_matrix('month24','sbctx_R')
-
-
-
-grad_ctx_12, aligned_grad_ctx_12 = get_aligned_gradients(mean_ctx_12, cube_matrix_ctx_12)
-grad_ctx_24, aligned_grad_ctx_24 = get_aligned_gradients(mean_ctx_24, cube_matrix_ctx_24)
-
-grad_sbctx_L_12, aligned_grad_sbctx_L_12 = get_aligned_gradients(mean_sbctx_L_12, cube_matrix_sbctx_L_12)
-grad_sbctx_L_24, aligned_grad_sbctx_L_24 = get_aligned_gradients(mean_sbctx_L_24, cube_matrix_sbctx_L_24)
-
-grad_sbctx_R_12, aligned_grad_sbctx_R_12 = get_aligned_gradients(mean_sbctx_R_12, cube_matrix_sbctx_R_12)
-grad_sbctx_R_24, aligned_grad_sbctx_R_24 = get_aligned_gradients(mean_sbctx_R_24, cube_matrix_sbctx_R_24)
-
-
-import dill
 
 # Save the file
-dill.dump(grad_ctx_12, file = open("/home/dimuthu1/temporay_scratch/PPMI_project2/derivatives/analysis/gradients/bs_emb/emb_ctx_12.pickle", "wb"))
-dill.dump(grad_ctx_24, file = open("/home/dimuthu1/temporay_scratch/PPMI_project2/derivatives/analysis/gradients/bs_emb/emb_ctx_24.pickle", "wb"))
-
-dill.dump(grad_sbctx_L_12, file = open("/home/dimuthu1/temporay_scratch/PPMI_project2/derivatives/analysis/gradients/bs_emb/emb_sbctx_L_12.pickle", "wb"))
-dill.dump(grad_sbctx_L_24, file = open("/home/dimuthu1/temporay_scratch/PPMI_project2/derivatives/analysis/gradients/bs_emb/emb_sbctx_L_24.pickle", "wb"))
-
-dill.dump(grad_sbctx_R_12, file = open("/home/dimuthu1/temporay_scratch/PPMI_project2/derivatives/analysis/gradients/bs_emb/emb_sbctx_R_12.pickle", "wb"))
-dill.dump(grad_sbctx_R_24, file = open("/home/dimuthu1/temporay_scratch/PPMI_project2/derivatives/analysis/gradients/bs_emb/emb_sbctx_R_24.pickle", "wb"))
-
-dill.dump(aligned_grad_ctx_12, file = open("/home/dimuthu1/temporay_scratch/PPMI_project2/derivatives/analysis/gradients/bs_emb/aligned_emb_ctx_12.pickle", "wb"))
-dill.dump(aligned_grad_ctx_24, file = open("/home/dimuthu1/temporay_scratch/PPMI_project2/derivatives/analysis/gradients/bs_emb/aligned_emb_ctx_24.pickle", "wb"))
-
-dill.dump(aligned_grad_sbctx_L_12, file = open("/home/dimuthu1/temporay_scratch/PPMI_project2/derivatives/analysis/gradients/bs_emb/aligned_emb_sbctx_L_12.pickle", "wb"))
-dill.dump(aligned_grad_sbctx_L_24, file = open("/home/dimuthu1/temporay_scratch/PPMI_project2/derivatives/analysis/gradients/bs_emb/aligned_emb_sbctx_L_24.pickle", "wb"))
-
-dill.dump(aligned_grad_sbctx_R_12, file = open("/home/dimuthu1/temporay_scratch/PPMI_project2/derivatives/analysis/gradients/bs_emb/aligned_emb_sbctx_R_12.pickle", "wb"))
-dill.dump(aligned_grad_sbctx_R_24, file = open("/home/dimuthu1/temporay_scratch/PPMI_project2/derivatives/analysis/gradients/bs_emb/aligned_emb_sbctx_R_24.pickle", "wb"))
+dill.dump(grad_ctx, file = open(snakemake.output.grad_ctx, "wb"))
+dill.dump(grad_sbctx_L, file = open(snakemake.output.grad_sbctx_L, "wb"))
+dill.dump(grad_sbctx_R, file = open(snakemake.output.grad_sbctx_R, "wb"))
+dill.dump(aligned_grad_ctx, file = open(snakemake.output.aligned_grad_ctx, "wb"))
+dill.dump(aligned_grad_sbctx_L, file = open(snakemake.output.aligned_grad_sbctx_L, "wb"))
+dill.dump(aligned_grad_sbctx_R, file = open(snakemake.output.aligned_grad_sbctx_R, "wb"))
 
 
 
-#np.save('/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/gradients/bs_emb/emb_ctx_12.npy', grad_ctx_12, allow_pickle=True)
-#np.save('/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/gradients/bs_emb/emb_ctx_24.npy', grad_ctx_24, allow_pickle=True)
-#np.save('/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/gradients/bs_emb/emb_sbctx_12.npy', grad_sbctx_12, allow_pickle=True)
-#np.save('/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/gradients/bs_emb/emb_sbctx_24.npy', grad_sbctx_24, allow_pickle=True)
 
-#np.save('/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/gradients/bs_emb/aligned_emb_ctx_12.npy', aligned_grad_ctx_12)
-#np.save('/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/gradients/bs_emb/aligned_emb_ctx_24.npy', aligned_grad_ctx_24)
-#np.save('/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/gradients/bs_emb/aligned_emb_sbctx_12.npy', aligned_grad_sbctx_12)
-#np.save('/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/gradients/bs_emb/aligned_emb_sbctx_24.npy', aligned_grad_sbctx_24)
+"""
+mean_ctx_24, cube_matrix_ctx_24 = get_mean_matrix('month24','ctx')
+mean_sbctx_L_24, cube_matrix_sbctx_L_24 = get_mean_matrix('month24','sbctx_L')
+mean_sbctx_R_24, cube_matrix_sbctx_R_24 = get_mean_matrix('month24','sbctx_R')
+
+grad_ctx_24, aligned_grad_ctx_24 = get_aligned_gradients(mean_ctx_24, cube_matrix_ctx_24)
+grad_sbctx_L_24, aligned_grad_sbctx_L_24 = get_aligned_gradients(mean_sbctx_L_24, cube_matrix_sbctx_L_24)
+grad_sbctx_R_24, aligned_grad_sbctx_R_24 = get_aligned_gradients(mean_sbctx_R_24, cube_matrix_sbctx_R_24)
+
+dill.dump(grad_ctx_24, file = open("/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/smoothed/gradients/bs_emb/emb_ctx_24.pickle", "wb"))
+dill.dump(grad_sbctx_L_24, file = open("/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/smoothed/gradients/bs_emb/emb_sbctx_L_24.pickle", "wb"))
+dill.dump(grad_sbctx_R_24, file = open("/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/smoothed/gradients/bs_emb/emb_sbctx_R_24.pickle", "wb"))
+dill.dump(aligned_grad_ctx_24, file = open("/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/smoothed/gradients/bs_emb/aligned_emb_ctx_24.pickle", "wb"))
+dill.dump(aligned_grad_sbctx_L_24, file = open("/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/smoothed/gradients/bs_emb/aligned_emb_sbctx_L_24.pickle", "wb"))
+dill.dump(aligned_grad_sbctx_R_24, file = open("/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/smoothed/gradients/bs_emb/aligned_emb_sbctx_R_24.pickle", "wb"))
+"""
+
+#add functionality to make bs_emb dir
+
+

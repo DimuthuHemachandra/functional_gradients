@@ -1,3 +1,38 @@
+fmriprep_m12_dir: ../derivatives/fmriprep_20_2_1_syn_sdc/fmriprep/sub-{subject}/ses-Month12/func/sub-{subject}_ses-Month12_task-rest_run-1_space-fsLR_den-91k_bold.dtseries.nii
+fmriprep_m24_dir: ../derivatives/fmriprep_20_2_1_syn_sdc/fmriprep/sub-{subject}/ses-Month24/func/sub-{subject}_ses-Month24_task-rest_run-1_space-fsLR_den-91k_bold.dtseries.nii
+
+
+fmriprep_m12_tsv: ../derivatives/fmriprep_20_2_1_syn_sdc/fmriprep/sub-{subject}/ses-Month12/func/sub-{subject}_ses-Month12_task-rest_run-1_desc-confounds_timeseries.tsv
+fmriprep_m24_tsv: ../derivatives/fmriprep_20_2_1_syn_sdc/fmriprep/sub-{subject}/ses-Month24/func/sub-{subject}_ses-Month24_task-rest_run-1_desc-confounds_timeseries.tsv
+
+
+ciftify_container: $SINGULARITY_DIR/bids-apps/tigrlab_fmriprep_ciftify_v1.3.2-2.3.3.sif
+
+cleaned_dir: /home/dimuthu1/scratch/PPMI_project2/derivatives/cleane_dtseries/
+
+analysis_dir: /home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/smoothed/
+
+left-surface: cfg/template.L.inflated.32k_fs_LR.surf.gii
+
+right-surface: cfg/template.R.inflated.32k_fs_LR.surf.gii
+
+schaefer_1000_labels: cfg/Schaefer2018_1000Parcels_7Networks_order.dlabel.nii
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 diffparc_dir: /home/dimuthu1/scratch/project2/derivatives/diffparc_dev
 
 participants_tsv: participants.tsv

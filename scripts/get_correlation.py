@@ -23,6 +23,7 @@ def make_out_dir(out_path):
 	        if exc.errno != errno.EEXIST:
 	          raise
 
+make_out_dir(snakemake.params.out_path)
 
 # Restructure Connectome WB label table
 labels_gii = nib.load('/scratch/dimuthu1/PPMI_project2/PPMI_gradients/cfg/Schaefer2018_1000Parcels_7Networks_order.dlabel.nii').get_fdata()
