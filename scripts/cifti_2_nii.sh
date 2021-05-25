@@ -1,15 +1,17 @@
 #!/bin/bash
 
+nii_dir=$1
+out_file=$2
+
 for cii in `ls ~/temporay_scratch/PPMI_project2/derivatives/analysis/plots/sbctx_nii/*.nii`
 
 	do 
-	prefix="image.dscalar.nii"
-	new_name=${cii/%$prefix}
+	#prefix="image.dscalar.nii"
+	#new_name=${cii/%$prefix}
 
-    wb_command -cifti-separate $cii COLUMN -volume-all ${new_mame}_3d.nii
+    wb_command -cifti-separate $cii COLUMN -volume-all ${out_file}
 
 	#img=/home/dimuthu1/scratch/project2/derivatives/diffparc_3T_nodistcorr/work/${labels}/bedpost.CIT168_striatum_cortical/seed_dtires.nii.gz
-	echo $ID
 	#compute ROIs for MNI left/right hemi
 	#dimx=`fslval ${img} dim1`
 	#halfx=$(echo "scale=0; $dimx/2" | bc)

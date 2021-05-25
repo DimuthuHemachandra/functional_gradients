@@ -13,37 +13,60 @@ subjects = [ s.strip('sub-') for s in subjects ]
 
 print(subjects)
 
+componants=['1','2','3']
+hemis=['L','R']
+sessions=['month12','month24']
 
 wildcard_constraints:
-    subject="[a-zA-Z0-9]+"
+    subject="[a-zA-Z0-9]+",
+    componanat="[a-zA-Z0-9]+",
+    hemi="[a-zA-Z0-9]+",
+    ses="[a-zA-Z0-9]+"
 
-componants=['1','2','3','4']
+
+
 
 diffparc_dir = config['diffparc_dir']
 
 rule all:
     input: 
-        cleaned_12 = expand(config['cleaned_dir']+'sub-{subject}_Month12_clean.dtseries.nii',subject=subjects),
-        cleaned_24 = expand(config['cleaned_dir']+'sub-{subject}_Month24_clean.dtseries.nii',subject=subjects),
-        smoothed_12 = expand(config['analysis_dir']+'processed_dtseries/sub-{subject}_Month12_clean_smoothed.dtseries.nii',subject=subjects),
-        smoothed_24 = expand(config['analysis_dir']+'processed_dtseries/sub-{subject}_Month24_clean_smoothed.dtseries.nii',subject=subjects),
-        cor_matrix_12 = expand(config['analysis_dir']+'corr_matrix/month12/sub-{subject}_month12_corr-matrix.npy',subject=subjects),
-        cor_matrix_24 = expand(config['analysis_dir']+'corr_matrix/month24/sub-{subject}_month24_corr-matrix.npy',subject=subjects),
+        #cleaned_12 = expand(config['cleaned_dir']+'sub-{subject}_Month12_clean.dtseries.nii',subject=subjects),
+        #cleaned_24 = expand(config['cleaned_dir']+'sub-{subject}_Month24_clean.dtseries.nii',subject=subjects),
+        #smoothed_12 = expand(config['analysis_dir']+'processed_dtseries/sub-{subject}_Month12_clean_smoothed.dtseries.nii',subject=subjects),
+        #smoothed_24 = expand(config['analysis_dir']+'processed_dtseries/sub-{subject}_Month24_clean_smoothed.dtseries.nii',subject=subjects),
+        #cor_matrix_12 = expand(config['analysis_dir']+'corr_matrix/month12/sub-{subject}_month12_corr-matrix.npy',subject=subjects),
+        #cor_matrix_24 = expand(config['analysis_dir']+'corr_matrix/month24/sub-{subject}_month24_corr-matrix.npy',subject=subjects),
     	grad_12 = [config['analysis_dir']+'gradients/bs_emb/emb_ctx_month12.pickle', config['analysis_dir']+'gradients/bs_emb/aligned_emb_ctx_month12.pickle', 
         config['analysis_dir']+ 'gradients/bs_emb/emb_sbctx_L_month12.pickle', config['analysis_dir']+'gradients/bs_emb/emb_sbctx_R_month12.pickle',
         config['analysis_dir']+'gradients/bs_emb/aligned_emb_sbctx_L_month12.pickle', config['analysis_dir']+'gradients/bs_emb/aligned_emb_sbctx_R_month12.pickle'],
         grad_24 = [config['analysis_dir']+'gradients/bs_emb/emb_ctx_month24.pickle', config['analysis_dir']+'gradients/bs_emb/aligned_emb_ctx_month24.pickle', 
         config['analysis_dir']+'gradients/bs_emb/emb_sbctx_L_month24.pickle', config['analysis_dir']+'gradients/bs_emb/emb_sbctx_R_month24.pickle',
         config['analysis_dir']+'gradients/bs_emb/aligned_emb_sbctx_L_month24.pickle', config['analysis_dir']+'gradients/bs_emb/aligned_emb_sbctx_R_month24.pickle'],
-    	project_ctx_grads_12 = [expand(config['analysis_dir']+'gradients/projections/cortex/sub-{subject}_month12_ctx_L_aligned_grad.func.gii',subject=subjects), 
-        expand(config['analysis_dir']+'gradients/projections/cortex/sub-{subject}_month12_ctx_R_aligned_grad.func.gii',subject=subjects),
-        config['analysis_dir']+'gradients/projections/cortex/month12_ctx_L_mean_grad.func.gii', config['analysis_dir']+'gradients/projections/cortex/month12_ctx_R_mean_grad.func.gii'],
-        project_ctx_grads_24 = [expand(config['analysis_dir']+'gradients/projections/cortex/sub-{subject}_month24_ctx_L_aligned_grad.func.gii',subject=subjects), 
-        expand(config['analysis_dir']+'gradients/projections/cortex/sub-{subject}_month24_ctx_R_aligned_grad.func.gii',subject=subjects),
-        config['analysis_dir']+'gradients/projections/cortex/month24_ctx_L_mean_grad.func.gii', config['analysis_dir']+'gradients/projections/cortex/month24_ctx_R_mean_grad.func.gii']
+        ctx_L_12 = expand(config['analysis_dir']+'gradients/projections/cortex/sub-{subject}_month12_ctx_L_aligned_grad.func.gii',subject=subjects),
+        ctx_R_12 = expand(config['analysis_dir']+'gradients/projections/cortex/sub-{subject}_month12_ctx_R_aligned_grad.func.gii',subject=subjects),
+        mean_ctx_L_12 = [config['analysis_dir']+'gradients/projections/cortex/mean_month12_ctx_L_grad.func.gii',
+        config['analysis_dir']+'gradients/projections/cortex/mean_month12_ctx_R_grad.func.gii'],
+        ctx_L_24 = expand(config['analysis_dir']+'gradients/projections/cortex/sub-{subject}_month24_ctx_L_aligned_grad.func.gii',subject=subjects),
+        ctx_R_24 = expand(config['analysis_dir']+'gradients/projections/cortex/sub-{subject}_month24_ctx_R_aligned_grad.func.gii',subject=subjects),
+        mean_ctx_L_24 = [config['analysis_dir']+'gradients/projections/cortex/mean_month24_ctx_L_grad.func.gii',
+        config['analysis_dir']+'gradients/projections/cortex/mean_month24_ctx_R_grad.func.gii'],
+        project_sbctx_grads_12 = [expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_month12_sbctx_R_aligned_grad{componant}_image.dscalar.nii',subject=subjects, componant=componants),
+        expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_month12_sbctx_R_aligned_grad{componant}_image.dscalar.nii',subject=subjects, componant=componants)],
+        project_sbctx_grads_24 = [expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_month24_sbctx_R_aligned_grad{componant}_image.dscalar.nii',subject=subjects, componant=componants),
+        expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_month24_sbctx_R_aligned_grad{componant}_image.dscalar.nii',subject=subjects, componant=componants)],
+        nii_all_files = expand(config['analysis_dir']+'gradients/projections/sbctx/nii/sub-{subject}_{ses}_sbctx_{hemi}_aligned_grad{componant}_image.nii',subject=subjects, componant=componants, hemi=hemis, ses=sessions)
+        nii_4D = config['analysis_dir']+'gradients/projections/sbctx/nii/concatednated_4D.nii'
+        #mean_sbctx_L_12 = [config['analysis_dir']+'gradients/projections/sbctx/mean_month12_sbctx_L_grad3_image.dscalar.nii',
+        #config['analysis_dir']+'gradients/projections/sbctx/mean_month12_sbctx_R_grad3_image.dscalar.nii']
+        #project_ctx_grads_24 = expand(config['analysis_dir']+'gradients/projections/sbctx/sub-{subject}_month24_sbctx_R_aligned_grad3_image.dscalar.nii',subject=subjects),
+        #project_ctx_grads_124 = expand(config['analysis_dir']+'gradients/projections/sbctx/sub-{subject}_month12_sbctx_L_aligned_grad3_image.dscalar.nii',subject=subjects),
+        #project_ctx_grads_24 = [expand(config['analysis_dir']+'gradients/projections/cortex/sub-{subject}_month24_ctx_L_aligned_grad.func.gii',subject=subjects), 
+        #expand(config['analysis_dir']+'gradients/projections/cortex/sub-{subject}_month24_ctx_R_aligned_grad.func.gii',subject=subjects),
+        #config['analysis_dir']+'gradients/projections/cortex/month24_ctx_L_mean_grad.func.gii', config['analysis_dir']+'gradients/projections/cortex/month24_ctx_R_mean_grad.func.gii']
 
 
         
+
 
 #Cleaning fmri data
 ####################################################################################
@@ -171,26 +194,113 @@ rule get_gradients_month24:
 ####################################################################################
 rule get_projection_month12: 
     input: grad_ctx = config['analysis_dir']+'gradients/bs_emb/emb_ctx_month12.pickle',
-            grad_sbctx_L = config['analysis_dir']+'gradients/bs_emb/emb_sbctx_L_month12.pickle',
-            grad_sbctx_R = config['analysis_dir']+'gradients/bs_emb/emb_sbctx_R_month12.pickle',
-            aligned_grad_ctx = config['analysis_dir']+'gradients/bs_emb/aligned_emb_ctx_month12.pickle',
-            aligned_grad_sbctx_L = config['analysis_dir']+'gradients/bs_emb/aligned_emb_sbctx_L_month12.pickle',
-            aligned_grad_sbctx_R = config['analysis_dir']+'gradients/bs_emb/aligned_emb_sbctx_R_month12.pickle'
+           aligned_grad_ctx = config['analysis_dir']+'gradients/bs_emb/aligned_emb_ctx_month12.pickle',
 
     params: month = 'month12',
             subjects = subjects,
-            out_path = config['analysis_dir']+'gradients/projections/cortex',
+            out_path = config['analysis_dir']+'gradients/projections/',
             labels = config['schaefer_1000_labels']
-           
+          
     output: ctx_L = expand(config['analysis_dir']+'gradients/projections/cortex/sub-{subject}_month12_ctx_L_aligned_grad.func.gii',subject=subjects),
-            ctx_R = expand(config['analysis_dir']+'gradients/projections/cortex/sub-{subject}_month12_ctx_R_aligned_grad.func.gii',subject=subjects),
-            mean_ctx_L = config['analysis_dir']+'gradients/projections/cortex/month12_ctx_L_mean_grad.func.gii',
-            mean_ctx_R = config['analysis_dir']+'gradients/projections/cortex/month12_ctx_R_mean_grad.func.gii'
+            ctx_R = expand(config['analysis_dir']+'gradients/projections/cortex/sub-{subject}_month12_ctx_R_aligned_grad.func.gii',subject=subjects), 
+            mean_ctx_L = config['analysis_dir']+'gradients/projections/cortex/mean_month12_ctx_L_grad.func.gii',
+            mean_ctx_R = config['analysis_dir']+'gradients/projections/cortex/mean_month12_ctx_R_grad.func.gii'
+
+    group: 'group'
+               
+    script: 'scripts/projection_ctx.py'
+
+
+rule get_projection_month24: 
+    input: grad_ctx = config['analysis_dir']+'gradients/bs_emb/emb_ctx_month24.pickle',
+           aligned_grad_ctx = config['analysis_dir']+'gradients/bs_emb/aligned_emb_ctx_month24.pickle',
+
+    params: month = 'month24',
+            subjects = subjects,
+            out_path = config['analysis_dir']+'gradients/projections/',
+            labels = config['schaefer_1000_labels']
+          
+    output: ctx_L = expand(config['analysis_dir']+'gradients/projections/cortex/sub-{subject}_month24_ctx_L_aligned_grad.func.gii',subject=subjects),
+            ctx_R = expand(config['analysis_dir']+'gradients/projections/cortex/sub-{subject}_month24_ctx_R_aligned_grad.func.gii',subject=subjects), 
+            mean_ctx_L = config['analysis_dir']+'gradients/projections/cortex/mean_month24_ctx_L_grad.func.gii',
+            mean_ctx_R = config['analysis_dir']+'gradients/projections/cortex/mean_month24_ctx_R_grad.func.gii'
+
+    group: 'group'
+               
+    script: 'scripts/projection_ctx.py'
+
+rule get_sbctx_projection_month12: 
+    input: mean_grad_sbctx_L = config['analysis_dir']+'gradients/bs_emb/emb_sbctx_L_month12.pickle',
+           mean_grad_sbctx_R = config['analysis_dir']+'gradients/bs_emb/emb_sbctx_R_month12.pickle',
+           aligned_grad_sbctx_L = config['analysis_dir']+'gradients/bs_emb/aligned_emb_sbctx_L_month12.pickle',
+           aligned_grad_sbctx_R = config['analysis_dir']+'gradients/bs_emb/aligned_emb_sbctx_R_month12.pickle'
+
+    params: month = 'month12',
+            subjects = subjects,
+            out_path = config['analysis_dir']+'gradients/projections/',
+            labels = config['schaefer_1000_labels']
+          
+    output: sbctx_L = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_month12_sbctx_L_aligned_grad{componant}_image.dscalar.nii',subject=subjects, componant=componants),
+            sbctx_R = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_month12_sbctx_R_aligned_grad{componant}_image.dscalar.nii',subject=subjects, componant=componants),
+            sbctx_mean_L = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/mean_month12_sbctx_L_grad{componant}_image.dscalar.nii',componant=componants),
+            sbctx_mean_R = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/mean_month12_sbctx_R_grad{componant}_image.dscalar.nii',componant=componants)
             
 
     group: 'group'
-    script: 'scripts/projections.py'
 
+    resources: time = 30, #30 mins
+               
+    script: 'scripts/projection_sbctx.py'
+
+rule get_sbctx_projection_month24: 
+    input: mean_grad_sbctx_L = config['analysis_dir']+'gradients/bs_emb/emb_sbctx_L_month24.pickle',
+           mean_grad_sbctx_R = config['analysis_dir']+'gradients/bs_emb/emb_sbctx_R_month24.pickle',
+           aligned_grad_sbctx_L = config['analysis_dir']+'gradients/bs_emb/aligned_emb_sbctx_L_month24.pickle',
+           aligned_grad_sbctx_R = config['analysis_dir']+'gradients/bs_emb/aligned_emb_sbctx_R_month24.pickle'
+
+    params: month = 'month24',
+            subjects = subjects,
+            out_path = config['analysis_dir']+'gradients/projections/',
+            labels = config['schaefer_1000_labels']
+          
+    output: sbctx_L = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_month24_sbctx_L_aligned_grad{componant}_image.dscalar.nii',subject=subjects, componant=componants),
+            sbctx_R = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_month24_sbctx_R_aligned_grad{componant}_image.dscalar.nii',subject=subjects, componant=componants),
+            sbctx_mean_L = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/mean_month24_sbctx_L_grad{componant}_image.dscalar.nii',componant=componants),
+            sbctx_mean_R = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/mean_month24_sbctx_R_grad{componant}_image.dscalar.nii',componant=componants)
+            
+
+    group: 'group'
+
+    resources: time = 30, #30 mins
+               
+    script: 'scripts/projection_sbctx.py'
+
+rule cii_to_nii: 
+    input: nii_files = config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_{ses}_sbctx_{hemi}_aligned_grad{componant}_image.dscalar.nii'
+
+    params: out_path = config['analysis_dir']+'gradients/projections/sbctx/nii/'
+            
+    output: nii_out = config['analysis_dir']+'gradients/projections/sbctx/nii/sub-{subject}_{ses}_sbctx_{hemi}_aligned_grad{componant}_image.nii'
+
+    group: 'group_2'
+
+    resources: time = 30, #30 mins
+               
+    shell: 'mkdir -p {params.out_path} && wb_command -cifti-separate {input.nii_files} COLUMN -volume-all {output.nii_out}'
+
+
+rule t_test:
+    input: nii_files = expand(config['analysis_dir']+'gradients/projections/sbctx/nii/sub-{subject}_{ses}_sbctx_{hemi}_aligned_grad{componant}_image.nii',subject=subjects, componant=componants, hemi=hemis, ses=sessions)
+    
+    params: out_path = config['analysis_dir']+'gradients/projections/sbctx/nii/'
+
+    output: nii_4D = config['analysis_dir']+'gradients/projections/sbctx/nii/concatednated_4D.nii'
+            
+
+    group: 'stat'
+               
+    script: 'scripts/t_stat.py'    
+"""
 rule get_projection_month24: 
     input: grad_ctx = config['analysis_dir']+'gradients/bs_emb/emb_ctx_month24.pickle',
             grad_sbctx_L = config['analysis_dir']+'gradients/bs_emb/emb_sbctx_L_month24.pickle',
@@ -201,13 +311,14 @@ rule get_projection_month24:
 
     params: month = 'month12',
             subjects = subjects,
-            out_path = config['analysis_dir']+'gradients/projections/cortex',
+            out_path = config['analysis_dir']+'gradients/projections/',
             labels = config['schaefer_1000_labels']
            
     output: ctx_L = expand(config['analysis_dir']+'gradients/projections/cortex/sub-{subject}_month24_ctx_L_aligned_grad.func.gii',subject=subjects),
             ctx_R = expand(config['analysis_dir']+'gradients/projections/cortex/sub-{subject}_month24_ctx_R_aligned_grad.func.gii',subject=subjects),
             mean_ctx_L = config['analysis_dir']+'gradients/projections/cortex/month24_ctx_L_mean_grad.func.gii',
             mean_ctx_R = config['analysis_dir']+'gradients/projections/cortex/month24_ctx_R_mean_grad.func.gii'
+            
             
 
     group: 'group'
@@ -230,7 +341,7 @@ rule get_group_plots:
     script: 'scripts/group_plot.py'
 
 
-
+"""
 """
 rule get_projections:
     input: gradient_csv = "../derivatives/analysis/cortex/gradients/sub-{subject}/sub-{subject}_gradients.csv",

@@ -108,10 +108,10 @@ def get_mean_matrix(session,region,matrix_files):
     if region=='ctx':
         sliced_matrix = matrix[:1000,:1000]
     if region=='sbctx_L':
-        sliced_matrix = matrix[:500,1000:2914]
+        sliced_matrix = matrix[:500,1000:2923]
         sliced_matrix= cosine_similarity(sliced_matrix.T, sliced_matrix.T)
     if region=='sbctx_R':
-        sliced_matrix = matrix[500:1000,2914:]
+        sliced_matrix = matrix[500:1000,2923:]
         sliced_matrix= cosine_similarity(sliced_matrix.T, sliced_matrix.T)
 
     cube_matrix = np.zeros((np.shape(sliced_matrix)[0],np.shape(sliced_matrix)[1],len(subj)))
@@ -125,11 +125,11 @@ def get_mean_matrix(session,region,matrix_files):
             sliced_matrix = matrix[:1000,:1000]
 
         if region=='sbctx_L':
-            sliced_matrix = matrix[:500,1000:2914]
+            sliced_matrix = matrix[:500,1000:2923]
             sliced_matrix= cosine_similarity(sliced_matrix.T, sliced_matrix.T)
 
         if region=='sbctx_R':
-            sliced_matrix = matrix[500:1000,2914:]
+            sliced_matrix = matrix[500:1000,2923:]
             sliced_matrix= cosine_similarity(sliced_matrix.T, sliced_matrix.T)
 
         cube_matrix[:,:,i]=sliced_matrix

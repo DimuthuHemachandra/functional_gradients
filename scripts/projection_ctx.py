@@ -70,11 +70,7 @@ def project_to_cortex(emb_ctx,out_L,out_R):
     
     nib.save(gii_R, out_R)
 
-#sliing the 3D matrix with aligned data for all the subjects and projecting the gradients to cortex
-
-
-
-emb_dir ='/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/smoothed/gradients/bs_emb'
+#emb_dir ='/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/smoothed/gradients/bs_emb'
 
 def get_cortex():
 
@@ -94,14 +90,10 @@ def get_cortex():
     #print(np.shape(emb_sbctx_R_12.gradients_))
     project_to_cortex(mean_emb_ctx,snakemake.output.mean_ctx_L, snakemake.output.mean_ctx_R)
 
+
+
+make_out_dir(snakemake.params.out_path+'/cortex/')
 get_cortex()
 
-make_out_dir(snakemake.params.out_path)
 
-def get_sbctx(): 
 
-    aligned_emb_sbctx_L_12 = dill.load(open(emb_dir+"/aligned_emb_sbctx_L_month12.pickle", "rb"))
-    aligned_emb_sbctx_L_24 = dill.load(open(emb_dir+"/aligned_emb_sbctx_L_month24.pickle", "rb"))
-
-    aligned_emb_sbctx_R_12 = dill.load(open(emb_dir+"/aligned_emb_sbctx_R_month12.pickle", "rb"))
-    aligned_emb_sbctx_R_24 = dill.load(open(emb_dir+"/aligned_emb_sbctx_R_month24.pickle", "rb"))
