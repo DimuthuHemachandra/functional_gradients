@@ -54,8 +54,9 @@ rule all:
         expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_month12_sbctx_R_aligned_grad{componant}_image.dscalar.nii',subject=subjects, componant=componants)],
         project_sbctx_grads_24 = [expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_month24_sbctx_R_aligned_grad{componant}_image.dscalar.nii',subject=subjects, componant=componants),
         expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_month24_sbctx_R_aligned_grad{componant}_image.dscalar.nii',subject=subjects, componant=componants)],
-        nii_all_files = expand(config['analysis_dir']+'gradients/projections/sbctx/nii/sub-{subject}_{ses}_sbctx_{hemi}_aligned_grad{componant}_image.nii',subject=subjects, componant=componants, hemi=hemis, ses=sessions)
-        nii_4D = config['analysis_dir']+'gradients/projections/sbctx/nii/concatednated_4D.nii'
+        nii_all_files = expand(config['analysis_dir']+'gradients/projections/sbctx/nii/sub-{subject}_{ses}_sbctx_{hemi}_aligned_grad{componant}_image.nii',subject=subjects, componant=componants, hemi=hemis, ses=sessions),
+        diff_grads = expand(config['analysis_dir']+'gradients/projections/sbctx/ttest/grad{componant}/{hemi}h/sub-{subject}_sbctx_{hemi}_grad{componant}_diff.nii.gz',subject=subjects, componant=componants, hemi=hemis)
+        #nii_4D_files = config['analysis_dir']+'gradients/projections/sbctx/nii/concatednated_4D.nii'
         #mean_sbctx_L_12 = [config['analysis_dir']+'gradients/projections/sbctx/mean_month12_sbctx_L_grad3_image.dscalar.nii',
         #config['analysis_dir']+'gradients/projections/sbctx/mean_month12_sbctx_R_grad3_image.dscalar.nii']
         #project_ctx_grads_24 = expand(config['analysis_dir']+'gradients/projections/sbctx/sub-{subject}_month24_sbctx_R_aligned_grad3_image.dscalar.nii',subject=subjects),
@@ -292,11 +293,12 @@ rule cii_to_nii:
 rule t_test:
     input: nii_files = expand(config['analysis_dir']+'gradients/projections/sbctx/nii/sub-{subject}_{ses}_sbctx_{hemi}_aligned_grad{componant}_image.nii',subject=subjects, componant=componants, hemi=hemis, ses=sessions)
     
-    params: out_path = config['analysis_dir']+'gradients/projections/sbctx/nii/'
+    params: out_path = config['analysis_dir']+'gradients/projections/sbctx/ttest/'
 
-    output: nii_4D = config['analysis_dir']+'gradients/projections/sbctx/nii/concatednated_4D.nii'
+    output: diff_grad = expand(config['analysis_dir']+'gradients/projections/sbctx/ttest/grad{componant}/{hemi}h/sub-{subject}_sbctx_{hemi}_grad{componant}_diff.nii.gz',subject=subjects, componant=componants, hemi=hemis),
+            #nii_4D = config['analysis_dir']+'gradients/projections/sbctx/nii/concatednated_4D.nii',
             
-
+            
     group: 'stat'
                
     script: 'scripts/t_stat.py'    
