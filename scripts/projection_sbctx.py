@@ -139,8 +139,8 @@ mean_grad1_R_list= [x for x in snakemake.output.sbctx_mean_R if 'grad1' in x ]
 mean_grad2_R_list= [x for x in snakemake.output.sbctx_mean_R if 'grad2' in x ]
 mean_grad3_R_list= [x for x in snakemake.output.sbctx_mean_R if 'grad3' in x ]
 
-get_sbctx(grad1_L_list, grad1_R_list, mean_grad1_L_list[0], mean_grad1_R_list[0],1)
-get_sbctx(grad2_L_list, grad2_R_list, mean_grad2_L_list[0], mean_grad2_R_list[0],2)
-get_sbctx(grad3_L_list, grad3_R_list, mean_grad3_L_list[0], mean_grad3_R_list[0],3)
+get_sbctx(grad1_L_list, grad1_R_list, mean_grad1_L_list[0], mean_grad1_R_list[0],0)
+get_sbctx(grad2_L_list, grad2_R_list, mean_grad2_L_list[0], mean_grad2_R_list[0],1)
+get_sbctx(grad3_L_list, grad3_R_list, mean_grad3_L_list[0], mean_grad3_R_list[0],2)
 
 

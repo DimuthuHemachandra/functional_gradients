@@ -3,13 +3,13 @@
 nii_dir=$1
 out_file=$2
 
-for cii in `ls ~/temporay_scratch/PPMI_project2/derivatives/analysis/plots/sbctx_nii/*.nii`
+for cii in `ls ~/scratch/PPMI_project2/derivatives/analysis/smoothed/plots/sbctx_nii/*image.dscalar.nii`
 
 	do 
-	#prefix="image.dscalar.nii"
-	#new_name=${cii/%$prefix}
+	prefix="image.dscalar.nii"
+	new_name=${cii/%$prefix}
 
-    wb_command -cifti-separate $cii COLUMN -volume-all ${out_file}
+    wb_command -cifti-separate $cii COLUMN -volume-all ${new_name}3d.nii.gz
 
 	#img=/home/dimuthu1/scratch/project2/derivatives/diffparc_3T_nodistcorr/work/${labels}/bedpost.CIT168_striatum_cortical/seed_dtires.nii.gz
 	#compute ROIs for MNI left/right hemi

@@ -10,6 +10,7 @@ from scipy.stats import zscore
 from sklearn.metrics.pairwise import cosine_similarity
 from nilearn.image import concat_imgs
 from nilearn.image import concat_imgs
+import time
 
 def make_out_dir(out_path):
 
@@ -33,40 +34,19 @@ def get_tstat(hemi, n):
 
     for i, s in enumerate(m12_R_g1):
 
-        os.system('fslmaths '+m24_R_g1[i]+' -sub '+m12_R_g1[i]+' '+diff_R_g1[i])
+        os.system('fslmaths '+m12_R_g1[i]+' -sub '+m24_R_g1[i]+' '+diff_R_g1[i])
 
+    time.sleep(240)
     image_diff_4D = concat_imgs(diff_R_g1)
     nib.save(image_diff_4D, out_path+'/concatednated_diff_4D.nii')
     os.system('randomise -i '+out_path+'/concatednated_diff_4D.nii -o '+out_path+'/OneSampT -1 -T')
 
-get_tstat('R', '1')
-get_tstat('R', '2')
+#get_tstat('R', '1')
+#get_tstat('R', '2')
 get_tstat('R', '3')
 
-get_tstat('L', '1')
-get_tstat('L', '2')
-get_tstat('L', '3')
-"""
-print(m12_R_g1)
-print(m24_R_g1)
+#get_tstat('L', '1')
+#get_tstat('L', '2')
+#get_tstat('L', '3')
 
-all_nii = m12_R_g1 + m24_R_g1
-print(np.shape(all_nii))
-
-image_4D = concat_imgs(all_nii)
-
-nib.save(image_4D, out_path+'/concatednated_4D.nii')
-
-#result_img = smooth_img(out_path+'/*3d.nii') 
-
-
-diff_files = []
-for i, s in enumerate(subj):
-
-    diff_files.append(glob.glob(out_path+'/'+s+'_diff.nii.gz')[0])
-
-#print(diff_files)
-
-image_diff_4D = concat_imgs(diff_files)
-nib.save(image_diff_4D, out_path+'/concatednated_diff_4D.nii')"""
 

@@ -36,26 +36,27 @@ rule all:
         #smoothed_24 = expand(config['analysis_dir']+'processed_dtseries/sub-{subject}_Month24_clean_smoothed.dtseries.nii',subject=subjects),
         #cor_matrix_12 = expand(config['analysis_dir']+'corr_matrix/month12/sub-{subject}_month12_corr-matrix.npy',subject=subjects),
         #cor_matrix_24 = expand(config['analysis_dir']+'corr_matrix/month24/sub-{subject}_month24_corr-matrix.npy',subject=subjects),
-    	grad_12 = [config['analysis_dir']+'gradients/bs_emb/emb_ctx_month12.pickle', config['analysis_dir']+'gradients/bs_emb/aligned_emb_ctx_month12.pickle', 
-        config['analysis_dir']+ 'gradients/bs_emb/emb_sbctx_L_month12.pickle', config['analysis_dir']+'gradients/bs_emb/emb_sbctx_R_month12.pickle',
-        config['analysis_dir']+'gradients/bs_emb/aligned_emb_sbctx_L_month12.pickle', config['analysis_dir']+'gradients/bs_emb/aligned_emb_sbctx_R_month12.pickle'],
-        grad_24 = [config['analysis_dir']+'gradients/bs_emb/emb_ctx_month24.pickle', config['analysis_dir']+'gradients/bs_emb/aligned_emb_ctx_month24.pickle', 
-        config['analysis_dir']+'gradients/bs_emb/emb_sbctx_L_month24.pickle', config['analysis_dir']+'gradients/bs_emb/emb_sbctx_R_month24.pickle',
-        config['analysis_dir']+'gradients/bs_emb/aligned_emb_sbctx_L_month24.pickle', config['analysis_dir']+'gradients/bs_emb/aligned_emb_sbctx_R_month24.pickle'],
-        ctx_L_12 = expand(config['analysis_dir']+'gradients/projections/cortex/sub-{subject}_month12_ctx_L_aligned_grad.func.gii',subject=subjects),
-        ctx_R_12 = expand(config['analysis_dir']+'gradients/projections/cortex/sub-{subject}_month12_ctx_R_aligned_grad.func.gii',subject=subjects),
-        mean_ctx_L_12 = [config['analysis_dir']+'gradients/projections/cortex/mean_month12_ctx_L_grad.func.gii',
-        config['analysis_dir']+'gradients/projections/cortex/mean_month12_ctx_R_grad.func.gii'],
-        ctx_L_24 = expand(config['analysis_dir']+'gradients/projections/cortex/sub-{subject}_month24_ctx_L_aligned_grad.func.gii',subject=subjects),
-        ctx_R_24 = expand(config['analysis_dir']+'gradients/projections/cortex/sub-{subject}_month24_ctx_R_aligned_grad.func.gii',subject=subjects),
-        mean_ctx_L_24 = [config['analysis_dir']+'gradients/projections/cortex/mean_month24_ctx_L_grad.func.gii',
-        config['analysis_dir']+'gradients/projections/cortex/mean_month24_ctx_R_grad.func.gii'],
-        project_sbctx_grads_12 = [expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_month12_sbctx_R_aligned_grad{componant}_image.dscalar.nii',subject=subjects, componant=componants),
-        expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_month12_sbctx_R_aligned_grad{componant}_image.dscalar.nii',subject=subjects, componant=componants)],
-        project_sbctx_grads_24 = [expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_month24_sbctx_R_aligned_grad{componant}_image.dscalar.nii',subject=subjects, componant=componants),
-        expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_month24_sbctx_R_aligned_grad{componant}_image.dscalar.nii',subject=subjects, componant=componants)],
-        nii_all_files = expand(config['analysis_dir']+'gradients/projections/sbctx/nii/sub-{subject}_{ses}_sbctx_{hemi}_aligned_grad{componant}_image.nii',subject=subjects, componant=componants, hemi=hemis, ses=sessions),
-        diff_grads = expand(config['analysis_dir']+'gradients/projections/sbctx/ttest/grad{componant}/{hemi}h/sub-{subject}_sbctx_{hemi}_grad{componant}_diff.nii.gz',subject=subjects, componant=componants, hemi=hemis)
+    	##grad_12 = [config['analysis_dir']+'gradients/bs_emb/emb_ctx_month12.pickle', config['analysis_dir']+'gradients/bs_emb/aligned_emb_ctx_month12.pickle', 
+        ##config['analysis_dir']+ 'gradients/bs_emb/emb_sbctx_L_month12.pickle', config['analysis_dir']+'gradients/bs_emb/emb_sbctx_R_month12.pickle',
+        ##config['analysis_dir']+'gradients/bs_emb/aligned_emb_sbctx_L_month12.pickle', config['analysis_dir']+'gradients/bs_emb/aligned_emb_sbctx_R_month12.pickle'],
+        ##grad_24 = [config['analysis_dir']+'gradients/bs_emb/emb_ctx_month24.pickle', config['analysis_dir']+'gradients/bs_emb/aligned_emb_ctx_month24.pickle', 
+        ##config['analysis_dir']+'gradients/bs_emb/emb_sbctx_L_month24.pickle', config['analysis_dir']+'gradients/bs_emb/emb_sbctx_R_month24.pickle',
+        ##config['analysis_dir']+'gradients/bs_emb/aligned_emb_sbctx_L_month24.pickle', config['analysis_dir']+'gradients/bs_emb/aligned_emb_sbctx_R_month24.pickle'],
+        ##ctx_L_12 = expand(config['analysis_dir']+'gradients/projections/cortex/sub-{subject}_month12_ctx_L_aligned_grad.func.gii',subject=subjects),
+        ##ctx_R_12 = expand(config['analysis_dir']+'gradients/projections/cortex/sub-{subject}_month12_ctx_R_aligned_grad.func.gii',subject=subjects),
+        ##mean_ctx_L_12 = [config['analysis_dir']+'gradients/projections/cortex/mean_month12_ctx_L_grad.func.gii',
+        ##config['analysis_dir']+'gradients/projections/cortex/mean_month12_ctx_R_grad.func.gii'],
+        ##ctx_L_24 = expand(config['analysis_dir']+'gradients/projections/cortex/sub-{subject}_month24_ctx_L_aligned_grad.func.gii',subject=subjects),
+        ##ctx_R_24 = expand(config['analysis_dir']+'gradients/projections/cortex/sub-{subject}_month24_ctx_R_aligned_grad.func.gii',subject=subjects),
+        ##mean_ctx_L_24 = [config['analysis_dir']+'gradients/projections/cortex/mean_month24_ctx_L_grad.func.gii',
+        ##config['analysis_dir']+'gradients/projections/cortex/mean_month24_ctx_R_grad.func.gii'],
+        ##project_sbctx_grads_12 = [expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_month12_sbctx_R_aligned_grad{componant}_image.dscalar.nii',subject=subjects, componant=componants),
+        ##expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_month12_sbctx_R_aligned_grad{componant}_image.dscalar.nii',subject=subjects, componant=componants)],
+        ##project_sbctx_grads_24 = [expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_month24_sbctx_R_aligned_grad{componant}_image.dscalar.nii',subject=subjects, componant=componants),
+        ##expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_month24_sbctx_R_aligned_grad{componant}_image.dscalar.nii',subject=subjects, componant=componants)],
+        ##nii_all_files = expand(config['analysis_dir']+'gradients/projections/sbctx/nii/sub-{subject}_{ses}_sbctx_{hemi}_aligned_grad{componant}_image.nii',subject=subjects, componant=componants, hemi=hemis, ses=sessions),
+        diff_grads = expand(config['analysis_dir']+'gradients/projections/sbctx/ttest/grad3/Rh/sub-{subject}_sbctx_R_grad3_diff.nii.gz',subject=subjects)
+        #diff_grads = expand(config['analysis_dir']+'gradients/projections/sbctx/ttest/grad{componant}/{hemi}h/sub-{subject}_sbctx_{hemi}_grad{componant}_diff.nii.gz',subject=subjects, componant=componants, hemi=hemis)
         #nii_4D_files = config['analysis_dir']+'gradients/projections/sbctx/nii/concatednated_4D.nii'
         #mean_sbctx_L_12 = [config['analysis_dir']+'gradients/projections/sbctx/mean_month12_sbctx_L_grad3_image.dscalar.nii',
         #config['analysis_dir']+'gradients/projections/sbctx/mean_month12_sbctx_R_grad3_image.dscalar.nii']
@@ -67,7 +68,7 @@ rule all:
 
 
         
-
+"""
 
 #Cleaning fmri data
 ####################################################################################
@@ -108,6 +109,7 @@ rule smoothed_dtseries_m12:
     params: out_path = config['analysis_dir']+'processed_dtseries/'
            
     output: smoothed_dts = join(config['analysis_dir'],'processed_dtseries/sub-{subject}_Month12_clean_smoothed.dtseries.nii')
+
 
     group: 'preprocess'
     shell: 'mkdir -p {params.out_path} && wb_command -cifti-smoothing {input.cleaned_dts} 2.55 2.55 COLUMN {output.smoothed_dts} -left-surface {input.left_surface} -right-surface  {input.right_surface} -fix-zeros-volume -fix-zeros-surface'
@@ -289,13 +291,13 @@ rule cii_to_nii:
                
     shell: 'mkdir -p {params.out_path} && wb_command -cifti-separate {input.nii_files} COLUMN -volume-all {output.nii_out}'
 
-
+"""
 rule t_test:
     input: nii_files = expand(config['analysis_dir']+'gradients/projections/sbctx/nii/sub-{subject}_{ses}_sbctx_{hemi}_aligned_grad{componant}_image.nii',subject=subjects, componant=componants, hemi=hemis, ses=sessions)
     
     params: out_path = config['analysis_dir']+'gradients/projections/sbctx/ttest/'
 
-    output: diff_grad = expand(config['analysis_dir']+'gradients/projections/sbctx/ttest/grad{componant}/{hemi}h/sub-{subject}_sbctx_{hemi}_grad{componant}_diff.nii.gz',subject=subjects, componant=componants, hemi=hemis),
+    output: diff_grad = expand(config['analysis_dir']+'gradients/projections/sbctx/ttest/grad3/Rh/sub-{subject}_sbctx_R_grad3_diff.nii.gz',subject=subjects),
             #nii_4D = config['analysis_dir']+'gradients/projections/sbctx/nii/concatednated_4D.nii',
             
             
@@ -448,185 +450,12 @@ rule get_group_plots:
 
 
 
-"""
-rule import_template_seed:
-    input: join(config['template_seg_dir'],config['template_seg_nii'])
-    output: 'diffparc/template_masks/sub-{template}_hemi-{hemi}_desc-{seed}_mask.nii.gz'
-    log: 'logs/import_template_seed/{template}_{seed}_{hemi}.log'
-    group: 'pre_track'
-    shell: 'cp -v {input} {output} &> {log}'
-
-
-rule transform_to_subject:
-    input: 
-        seed = rules.import_template_seed.output,
-        affine = lambda wildcards: glob(join(config['ants_template_dir'],config['ants_affine_mat'].format(**wildcards))),
-        invwarp = lambda wildcards: glob(join(config['ants_template_dir'],config['ants_invwarp_nii'].format(**wildcards))),
-        ref = 'diffparc/sub-{subject}/masks/lh_rh_targets_native.nii.gz'
-    output: 'diffparc/sub-{subject}/masks/seed_from-{template}_{seed}_{hemi}.nii.gz'
-    envmodules: 'ants'
-    singularity: config['singularity_neuroglia']
-    log: 'logs/transform_to_subject/{template}_sub-{subject}_{seed}_{hemi}.log'
-    group: 'pre_track'
-    shell:
-        'antsApplyTransforms -d 3 --interpolation NearestNeighbor -i {input.seed} -o {output} -r {input.ref} -t [{input.affine},1] -t {input.invwarp} &> {log}'
-    
-    
-rule resample_targets:
-    input: 
-        dwi = join(config['prepdwi_dir'],'bedpost','sub-{subject}','mean_S0samples.nii.gz'),
-        targets = 'diffparc/sub-{subject}/masks/lh_rh_targets_native.nii.gz'
-    params:
-        seed_resolution = config['probtrack']['seed_resolution']
-    output:
-        mask = 'diffparc/sub-{subject}/masks/brain_mask_dwi.nii.gz',
-        mask_res = 'diffparc/sub-{subject}/masks/brain_mask_dwi_resampled.nii.gz',
-        targets_res = 'diffparc/sub-{subject}/masks/lh_rh_targets_dwi.nii.gz'
-    singularity: config['singularity_neuroglia']
-    log: 'logs/resample_targets/sub-{subject}.log'
-    group: 'pre_track'
-    shell:
-        'fslmaths {input.dwi} -bin {output.mask} &&'
-        'mri_convert {output.mask} -vs {params.seed_resolution} {params.seed_resolution} {params.seed_resolution} {output.mask_res} -rt nearest &&'
-        'reg_resample -flo {input.targets} -res {output.targets_res} -ref {output.mask_res} -NN 0  &> {log}'
-
-rule resample_seed:
-    input: 
-        seed = rules.transform_to_subject.output,
-        mask_res = 'diffparc/sub-{subject}/masks/brain_mask_dwi_resampled.nii.gz'
-    output:
-        seed_res = 'diffparc/sub-{subject}/masks/seed_from-{template}_{seed}_{hemi}_resampled.nii.gz',
-    singularity: config['singularity_neuroglia']
-    log: 'logs/resample_seed/{template}_sub-{subject}_{seed}_{hemi}.log'
-    group: 'pre_track'
-    shell:
-        'reg_resample -flo {input.seed} -res {output.seed_res} -ref {input.mask_res} -NN 0 &> {log}'
 
     
+
     
-
-rule split_targets:
-    input: 
-        targets = 'diffparc/sub-{subject}/masks/lh_rh_targets_dwi.nii.gz',
-    params:
-        target_nums = lambda wildcards: [str(i) for i in range(len(targets))],
-        target_seg = expand('diffparc/sub-{subject}/targets/{target}.nii.gz',target=targets,allow_missing=True)
-    output:
-        target_seg_dir = directory('diffparc/sub-{subject}/targets')
-    singularity: config['singularity_neuroglia']
-    log: 'logs/split_targets/sub-{subject}.log'
-    threads: 32 
-    group: 'pre_track'
-    shell:
-        'mkdir -p {output} && parallel  --jobs {threads} fslmaths {input.targets} -thr {{1}} -uthr {{1}} -bin {{2}} &> {log} ::: {params.target_nums} :::+ {params.target_seg}'
-
-rule gen_targets_txt:
-    input:
-        target_seg_dir = 'diffparc/sub-{subject}/targets'
-    params:
-        target_seg = expand('diffparc/sub-{subject}/targets/{target}.nii.gz',target=targets,allow_missing=True)
-    output:
-        target_txt = 'diffparc/sub-{subject}/target_images.txt'
-    log: 'logs/get_targets_txt/sub-{subject}.log'
-    group: 'pre_track'
-    run:
-        f = open(output.target_txt,'w')
-        for s in params.target_seg:
-            f.write(f'{s}\n')
-        f.close()
+  
 
 
-rule run_probtrack:
-    input:
-        seed_res = rules.resample_seed.output,
-        target_txt = rules.gen_targets_txt.output,
-        mask = 'diffparc/sub-{subject}/masks/brain_mask_dwi.nii.gz',
-        target_seg_dir = 'diffparc/sub-{subject}/targets'
-    params:
-        bedpost_merged = join(config['prepdwi_dir'],'bedpost','sub-{subject}','merged'),
-        probtrack_opts = config['probtrack']['opts'],
-        out_target_seg = expand('diffparc/sub-{subject}/probtrack_{template}_{seed}_{hemi}/seeds_to_{target}.nii.gz',target=targets,allow_missing=True)
-    output:
-        probtrack_dir = directory('diffparc/sub-{subject}/probtrack_{template}_{seed}_{hemi}')
-    threads: 2
-    resources: 
-        mem_mb = 8000, 
-        time = 30, #30 mins
-        gpus = 1 #1 gpu
-    log: 'logs/run_probtrack/{template}_sub-{subject}_{seed}_{hemi}.log'
-    shell:
-        'mkdir -p {output.probtrack_dir} && probtrackx2_gpu --samples={params.bedpost_merged}  --mask={input.mask} --seed={input.seed_res} ' 
-        '--targetmasks={input.target_txt} --seedref={input.seed_res} --nsamples={config[''probtrack''][''nsamples'']} ' 
-        '--dir={output.probtrack_dir} {params.probtrack_opts} -V 2  &> {log}'
 
-
-rule transform_conn_to_template:
-    input:
-        connmap_dir = 'diffparc/sub-{subject}/probtrack_{template}_{seed}_{hemi}',
-        affine =  lambda wildcards: glob(join(config['ants_template_dir'],config['ants_affine_mat'].format(subject=wildcards.subject))),
-        warp =  lambda wildcards: glob(join(config['ants_template_dir'],config['ants_warp_nii'].format(subject=wildcards.subject))),
-        ref = join(config['ants_template_dir'],config['ants_ref_nii'])
-    params:
-        in_connmap_3d = expand('diffparc/sub-{subject}/probtrack_{template}_{seed}_{hemi}/seeds_to_{target}.nii.gz',target=targets,allow_missing=True),
-        out_connmap_3d = expand('diffparc/sub-{subject}/probtrack_{template}_{seed}_{hemi}_warped/seeds_to_{target}_space-{template}.nii.gz',target=targets,allow_missing=True)
-    output:
-        connmap_dir = directory('diffparc/sub-{subject}/probtrack_{template}_{seed}_{hemi}_warped')
-    envmodules: 'ants'
-    singularity: config['singularity_neuroglia']
-    threads: 32
-    resources:
-        mem_mb = 128000
-    log: 'logs/transform_conn_to_template/sub-{subject}_{seed}_{hemi}_{template}.log'
-    group: 'post_track'
-    shell:
-        'mkdir -p {output} && ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=2 parallel  --jobs {threads} antsApplyTransforms -d 3 --interpolation Linear -i {{1}} -o {{2}}  -r {input.ref} -t {input.warp} -t {input.affine} &> {log} :::  {params.in_connmap_3d} :::+ {params.out_connmap_3d}' 
-
-
-rule save_connmap_template_npz:
-    input:
-        mask = 'diffparc/template_masks/sub-{template}_hemi-{hemi}_desc-{seed}_mask.nii.gz',
-        connmap_dir = 'diffparc/sub-{subject}/probtrack_{template}_{seed}_{hemi}_warped'
-    params:
-        connmap_3d = expand('diffparc/sub-{subject}/probtrack_{template}_{seed}_{hemi}_warped/seeds_to_{target}_space-{template}.nii.gz',target=targets,allow_missing=True),
-    output:
-        connmap_npz = 'diffparc/sub-{subject}/connmap/sub-{subject}_space-{template}_seed-{seed}_hemi-{hemi}_connMap.npz'
-    log: 'logs/save_connmap_to_template_npz/sub-{subject}_{seed}_{hemi}_{template}.log'
-    group: 'post_track'
-    script: 'scripts/save_connmap_template_npz.py'
-
-rule gather_connmap_group:
-    input:
-        connmap_npz = expand('diffparc/sub-{subject}/connmap/sub-{subject}_space-{template}_seed-{seed}_hemi-{hemi}_connMap.npz',subject=subjects,allow_missing=True)
-    output:
-        connmap_group_npz = 'diffparc/connmap/group_space-{template}_seed-{seed}_hemi-{hemi}_connMap.npz'
-    log: 'logs/gather_connmap_group/{seed}_{hemi}_{template}.log'
-    run:
-        import numpy as np
-        
-        #load first file to get shape
-        data = np.load(input['connmap_npz'][0])
-        affine = data['affine']
-        mask = data['mask']
-        conn_shape = data['conn'].shape
-        nsubjects = len(input['connmap_npz'])
-        conn_group = np.zeros([nsubjects,conn_shape[0],conn_shape[1]])
-        
-        for i,npz in enumerate(input['connmap_npz']):
-            data = np.load(npz)
-            conn_group[i,:,:] = data['conn']
-            
-        #save conn_group, mask and affine
-        np.savez(output['connmap_group_npz'], conn_group=conn_group,mask=mask,affine=affine)
-     
-rule spectral_clustering:
-    input:
-        connmap_group_npz = 'diffparc/connmap/group_space-{template}_seed-{seed}_hemi-{hemi}_connMap.npz'
-    params:
-        max_k = config['max_k']
-    output:
-        cluster_k = expand('diffparc/clustering/group_space-{template}_seed-{seed}_hemi-{hemi}_method-spectralcosine_k-{k}_cluslabels.nii.gz',k=range(2,config['max_k']+1),allow_missing=True)
-    script: 'scripts/spectral_clustering.py'
-        
-"""
-     
     
