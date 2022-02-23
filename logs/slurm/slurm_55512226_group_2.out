@@ -1,0 +1,21 @@
+Building DAG of jobs...
+Using shell: /cvmfs/soft.computecanada.ca/gentoo/2020/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job counts:
+	count	jobs
+	1	cii_to_nii
+	1
+
+[Tue Dec 14 22:43:33 2021]
+rule cii_to_nii:
+    input: /home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/smoothed/gradients/projections/sbctx/cifti/sub-3380_month24_sbctx_L_aligned_grad1_image.dscalar.nii
+    output: /home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/smoothed/gradients/projections/sbctx/nii/sub-3380_month24_sbctx_L_aligned_grad1_image.nii
+    jobid: 0
+    wildcards: subject=3380, ses=month24, hemi=L, componant=1
+    resources: mem_mb=4000, time=60
+
+[Tue Dec 14 22:43:34 2021]
+Finished job 0.
+1 of 1 steps (100%) done
+['3118', '3119', '3120', '3124', '3125', '3131', '3132', '3372', '3373', '3375', '3377', '3378', '3380', '3386', '3392', '3593', '3758', '3760', '3771', '3819', '3822', '3823', '3824', '3825', '3826', '3828', '3829', '3831', '3832', '3834', '3835', '4021', '4022', '4030', '4034', '4035', '4038']

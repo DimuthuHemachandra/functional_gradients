@@ -6,7 +6,7 @@ fmriprep_m12_tsv: ../derivatives/fmriprep_20_2_1_syn_sdc/fmriprep/sub-{subject}/
 fmriprep_m24_tsv: ../derivatives/fmriprep_20_2_1_syn_sdc/fmriprep/sub-{subject}/ses-Month24/func/sub-{subject}_ses-Month24_task-rest_run-1_desc-confounds_timeseries.tsv
 
 
-ciftify_container: $SINGULARITY_DIR/bids-apps/tigrlab_fmriprep_ciftify_v1.3.2-2.3.3.sif
+ciftify_container: /project/6050199/akhanf/singularity/bids-apps/tigrlab_fmriprep_ciftify_v1.3.2-2.3.3.sif
 
 cleaned_dir: /home/dimuthu1/scratch/PPMI_project2/derivatives/cleane_dtseries/
 

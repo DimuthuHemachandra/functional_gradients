@@ -73,11 +73,12 @@ def get_aligned_gradients(correlation_mean, correlation_matrix):
 
     #getting the gradinet for the mean
     ngradients = 4
-    gm = GradientMaps(n_components=ngradients, kernel='normalized_angle', approach='dm', random_state=0).fit(correlation_mean)
+    
+    gm = GradientMaps(n_components=ngradients, kernel='gaussian', approach='dm', random_state=0).fit(correlation_mean)
+    #print(correlation_matrix[:,:,0])
     #gm_emb = gm.fit(correlation_mean)
-
     #getting the gradient for individual subject and aligning with the average
-    gp = GradientMaps(n_components=ngradients, kernel='normalized_angle',approach='dm', random_state=0,alignment='procrustes')
+    gp = GradientMaps(n_components=ngradients, kernel='gaussian',approach='dm', random_state=0,alignment='procrustes')
         
     # With procrustes alignment
     nsubjects = len(subj)
@@ -99,7 +100,7 @@ def get_aligned_gradients(correlation_mean, correlation_matrix):
 
     return gm,grad_aligned
 
-def get_mean_matrix(session,region,matrix_files):
+def get_mean_matrix(region,matrix_files):
     #subj = ['3119','3120']
     #matrix_dir = '/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/smoothed/corr_matrix/'+session
 
@@ -135,35 +136,76 @@ def get_mean_matrix(session,region,matrix_files):
         cube_matrix[:,:,i]=sliced_matrix
 
     mean_data = np.mean(cube_matrix, axis=2)
+    #print(np.shape(mean_data))
+
+    mean_data[np.isnan(mean_data)] = 0
+    cube_matrix[np.isnan(cube_matrix)] = 0
+
+    #mean_data[mean_data<0] = 0
+    #cube_matrix[cube_matrix<0] = 0
+    #mean_data = np.where(mean_data<0, 0, mean_data)
+    #cube_matrix = np.where(cube_matrix<0, 0, cube_matrix)
+
+    #mean_data = np.where(mean_data>1, 1.0, mean_data)
+    #cube_matrix = np.where(cube_matrix>1, 1.0, cube_matrix)
     #mean_data = reject_outliers_2(cube_matrix, m=2.)
 
     return mean_data, cube_matrix
 
 
+"""#matrix_files_L_12 = []
+matrix_files_R_12 = []
+#matrix_files_L_24 = []
+matrix_files_R_24 = []
 
-matrix_files = snakemake.input.matrix_files
-month = snakemake.params.month
+for sub in subj:
+    #matrix_files_L_12.append('../../derivatives/analysis/structural/cortex/gradients/sub-'+sub+'_ses-Month12/L_matrix.npy')
+    matrix_files_R_12.append('../../derivatives/analysis/smoothed/corr_matrix/month12/sub-'+sub+'_month12_corr-matrix.npy')
+    #matrix_files_L_24.append('../../derivatives/analysis/structural/cortex/gradients/sub-'+sub+'_ses-Month24/L_matrix.npy')
+    matrix_files_R_24.append('../../derivatives/analysis/smoothed/corr_matrix/month24/sub-'+sub+'_month24_corr-matrix.npy')"""
+
+matrix_files_12 = snakemake.input.matrix_files_12
+matrix_files_24 = snakemake.input.matrix_files_24
+#month = snakemake.params.month
 make_out_dir(snakemake.params.grad_path)
 
 
-mean_ctx, cube_matrix_ctx = get_mean_matrix(month,'ctx',matrix_files)
-mean_sbctx_L, cube_matrix_sbctx_L= get_mean_matrix(month,'sbctx_L',matrix_files)
-mean_sbctx_R, cube_matrix_sbctx_R= get_mean_matrix(month,'sbctx_R',matrix_files)
+mean_ctx_12, cube_matrix_ctx_12 = get_mean_matrix('ctx',matrix_files_12)
+mean_sbctx_L_12, cube_matrix_sbctx_L_12= get_mean_matrix('sbctx_L',matrix_files_12)
+mean_sbctx_R_12, cube_matrix_sbctx_R_12= get_mean_matrix('sbctx_R',matrix_files_12)
 
-grad_ctx, aligned_grad_ctx = get_aligned_gradients(mean_ctx, cube_matrix_ctx)
-grad_sbctx_L, aligned_grad_sbctx_L = get_aligned_gradients(mean_sbctx_L, cube_matrix_sbctx_L)
-grad_sbctx_R, aligned_grad_sbctx_R = get_aligned_gradients(mean_sbctx_R, cube_matrix_sbctx_R)
+mean_ctx_24, cube_matrix_ctx_24 = get_mean_matrix('ctx',matrix_files_24)
+mean_sbctx_L_24, cube_matrix_sbctx_L_24= get_mean_matrix('sbctx_L',matrix_files_24)
+mean_sbctx_R_24, cube_matrix_sbctx_R_24= get_mean_matrix('sbctx_R',matrix_files_24)
+
+mean_ctx = np.mean( np.array([mean_ctx_12, mean_ctx_24]), axis=0 )
+mean_sbctx_L = np.mean( np.array([mean_sbctx_L_12, mean_sbctx_L_24]), axis=0 )
+mean_sbctx_R = np.mean( np.array([mean_sbctx_R_12, mean_sbctx_R_24]), axis=0 )
+
+grad_ctx_12, aligned_grad_ctx_12 = get_aligned_gradients(mean_ctx, cube_matrix_ctx_12)
+grad_sbctx_L_12, aligned_grad_sbctx_L_12 = get_aligned_gradients(mean_sbctx_L, cube_matrix_sbctx_L_12)
+grad_sbctx_R_12, aligned_grad_sbctx_R_12 = get_aligned_gradients(mean_sbctx_R, cube_matrix_sbctx_R_12)
+
+grad_ctx_24, aligned_grad_ctx_24 = get_aligned_gradients(mean_ctx, cube_matrix_ctx_24)
+grad_sbctx_L_24, aligned_grad_sbctx_L_24 = get_aligned_gradients(mean_sbctx_L, cube_matrix_sbctx_L_24)
+grad_sbctx_R_24, aligned_grad_sbctx_R_24= get_aligned_gradients(mean_sbctx_R, cube_matrix_sbctx_R_24)
+
 
 
 # Save the file
-dill.dump(grad_ctx, file = open(snakemake.output.grad_ctx, "wb"))
-dill.dump(grad_sbctx_L, file = open(snakemake.output.grad_sbctx_L, "wb"))
-dill.dump(grad_sbctx_R, file = open(snakemake.output.grad_sbctx_R, "wb"))
-dill.dump(aligned_grad_ctx, file = open(snakemake.output.aligned_grad_ctx, "wb"))
-dill.dump(aligned_grad_sbctx_L, file = open(snakemake.output.aligned_grad_sbctx_L, "wb"))
-dill.dump(aligned_grad_sbctx_R, file = open(snakemake.output.aligned_grad_sbctx_R, "wb"))
+dill.dump(grad_ctx_12, file = open(snakemake.output.grad_ctx_12, "wb"))
+dill.dump(grad_sbctx_L_12, file = open(snakemake.output.grad_sbctx_L_12, "wb"))
+dill.dump(grad_sbctx_R_12, file = open(snakemake.output.grad_sbctx_R_12, "wb"))
+dill.dump(aligned_grad_ctx_12, file = open(snakemake.output.aligned_grad_ctx_12, "wb"))
+dill.dump(aligned_grad_sbctx_L_12, file = open(snakemake.output.aligned_grad_sbctx_L_12, "wb"))
+dill.dump(aligned_grad_sbctx_R_12, file = open(snakemake.output.aligned_grad_sbctx_R_12, "wb"))
 
-
+dill.dump(grad_ctx_24, file = open(snakemake.output.grad_ctx_24, "wb"))
+dill.dump(grad_sbctx_L_24, file = open(snakemake.output.grad_sbctx_L_24, "wb"))
+dill.dump(grad_sbctx_R_24, file = open(snakemake.output.grad_sbctx_R_24, "wb"))
+dill.dump(aligned_grad_ctx_24, file = open(snakemake.output.aligned_grad_ctx_24, "wb"))
+dill.dump(aligned_grad_sbctx_L_24, file = open(snakemake.output.aligned_grad_sbctx_L_24, "wb"))
+dill.dump(aligned_grad_sbctx_R_24, file = open(snakemake.output.aligned_grad_sbctx_R_24, "wb"))
 
 
 """
