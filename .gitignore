@@ -131,3 +131,5 @@ dmypy.json
 /notebooks/__pycache__
 /notebooks/utilities.py
 .*
+
+/logs/
