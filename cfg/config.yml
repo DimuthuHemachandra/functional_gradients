@@ -1,22 +1,28 @@
-fmriprep_m12_dir: ../derivatives/fmriprep_20_2_1_syn_sdc/fmriprep/sub-{subject}/ses-Month12/func/sub-{subject}_ses-Month12_task-rest_run-1_space-fsLR_den-91k_bold.dtseries.nii
+fmriprep_dir: ../derivatives/fmriprep_20_2_1_syn_sdc/fmriprep/sub-{subject}/ses-{ses}/func/sub-{subject}_ses-{ses}_task-rest_run-1_space-fsLR_den-91k_bold.dtseries.nii
 fmriprep_m24_dir: ../derivatives/fmriprep_20_2_1_syn_sdc/fmriprep/sub-{subject}/ses-Month24/func/sub-{subject}_ses-Month24_task-rest_run-1_space-fsLR_den-91k_bold.dtseries.nii
 
 
-fmriprep_m12_tsv: ../derivatives/fmriprep_20_2_1_syn_sdc/fmriprep/sub-{subject}/ses-Month12/func/sub-{subject}_ses-Month12_task-rest_run-1_desc-confounds_timeseries.tsv
+fmriprep_tsv: ../derivatives/fmriprep_20_2_1_syn_sdc/fmriprep/sub-{subject}/ses-{ses}/func/sub-{subject}_ses-{ses}_task-rest_run-1_desc-confounds_timeseries.tsv
 fmriprep_m24_tsv: ../derivatives/fmriprep_20_2_1_syn_sdc/fmriprep/sub-{subject}/ses-Month24/func/sub-{subject}_ses-Month24_task-rest_run-1_desc-confounds_timeseries.tsv
 
 
 ciftify_container: /project/6050199/akhanf/singularity/bids-apps/tigrlab_fmriprep_ciftify_v1.3.2-2.3.3.sif
 
-cleaned_dir: /home/dimuthu1/scratch/PPMI_project2/derivatives/cleane_dtseries/
+cleaned_dir: /home/dimuthu1/scratch/PPMI_project2/derivatives/cleaned_dtseries_new/
 
-analysis_dir: /home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/smoothed/
+analysis_dir: /home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/functional_test/
 
 left-surface: cfg/template.L.inflated.32k_fs_LR.surf.gii
 
 right-surface: cfg/template.R.inflated.32k_fs_LR.surf.gii
 
 schaefer_1000_labels: cfg/Schaefer2018_1000Parcels_7Networks_order.dlabel.nii
+
+atlas_label: cfg/Schaefer2018_1000Parcels_7Networks_order.dlabel.nii
+
+atlas_label_txt: cfg/Schaefer2018_1000Parcels_7Networks_order_info.txt
+
+greyordinates: cfg/91282_Greyordinates.dscalar.nii
 
 
 

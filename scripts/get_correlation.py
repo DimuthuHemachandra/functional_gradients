@@ -1,15 +1,9 @@
-from brainspace.utils.parcellation import reduce_by_labels, map_to_labels
-from brainspace.gradient import GradientMaps
 import numpy as np
 import pandas as pd
 import nibabel as nib
-import seaborn as sns
 import os
-import glob
-
 from nilearn.connectome import ConnectivityMeasure
 
-import matplotlib.pyplot as plt
 
 
 def make_out_dir(out_path):
@@ -26,8 +20,8 @@ def make_out_dir(out_path):
 make_out_dir(snakemake.params.out_path)
 
 # Restructure Connectome WB label table
-labels_gii = nib.load('/scratch/dimuthu1/PPMI_project2/PPMI_gradients/cfg/Schaefer2018_1000Parcels_7Networks_order.dlabel.nii').get_fdata()
-labels_txt = pd.read_csv('/scratch/dimuthu1/PPMI_project2/PPMI_gradients/cfg/Schaefer2018_1000Parcels_7Networks_order_info.txt',header=None)
+labels_gii = nib.load(snakemake.params.atlas_labels).get_fdata()
+labels_txt = pd.read_csv(snakemake.params.atlas_labels_txt,header=None)
 
 df1 = labels_txt[labels_txt.index % 2 != 0].reset_index()
 df2 = labels_txt[labels_txt.index % 2 == 0].reset_index()
@@ -49,7 +43,7 @@ reduced_ts = reduced_ts.T
 ctx_mean_ts = np.where(np.isnan(reduced_ts), np.ma.array(reduced_ts, mask=np.isnan(reduced_ts)).mean(axis=0), reduced_ts) 
 
 #extracting subcortex tseries
-atlas = nib.load('/scratch/dimuthu1/PPMI_project2/PPMI_gradients/cfg/91282_Greyordinates.dscalar.nii').get_fdata()
+atlas = nib.load(snakemake.params.greyordinates).get_fdata()
 dtseries_data = dtseries.get_fdata()
 
 put_L = dtseries_data[:,(atlas[0]==12)]

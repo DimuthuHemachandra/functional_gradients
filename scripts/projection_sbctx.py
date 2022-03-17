@@ -51,8 +51,8 @@ def make_out_dir(out_path):
 
 
 def get_sbctx_projections(grad_array,side,output_file):
-    atlas = nib.load('/home/dimuthu1/scratch/PPMI_project2/PPMI_gradients/cfg/91282_Greyordinates.dscalar.nii').get_fdata()
-    img = nib.load('/home/dimuthu1/scratch/PPMI_project2/PPMI_gradients/cfg/91282_Greyordinates.dscalar.nii')
+    atlas = nib.load(snakemake.params.greyordinates).get_fdata()
+    img = nib.load(snakemake.params.greyordinates)
 
     true_vals = atlas[0]
     

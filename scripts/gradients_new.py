@@ -1,19 +1,12 @@
 import pandas as pd
 import os
-import glob
-import io 
 import dill
 import numpy as np
-import matplotlib.pyplot as plt
-import nibabel as nib
-import seaborn as sns
 from scipy.stats import zscore
 from brainspace.utils.parcellation import reduce_by_labels, map_to_mask
 from brainspace.gradient import GradientMaps
-from brainspace.datasets import load_parcellation
-from brainspace.plotting import plot_hemispheres
-from brainspace.utils.parcellation import map_to_labels
 from sklearn.metrics.pairwise import cosine_similarity
+import itertools
 
 
 """df = pd.read_table('../participants.tsv')
@@ -22,8 +15,6 @@ subj = [ s.strip('sub-') for s in subjects ]"""
 
 subj = snakemake.params.subjects
 
-#labels_gii = nib.load('/scratch/dimuthu1/PPMI_project2/PPMI_gradients/cfg/Schaefer2018_1000Parcels_7Networks_order.dlabel.nii').get_fdata()
-#mask = ~np.isin(labels_gii[0],0)
 
 def make_out_dir(out_path):
 
@@ -56,7 +47,7 @@ def get_gradients(matrix,region):
     return gradient_df
 
 
-import itertools
+
 def reject_outliers_2(matrix, m=2.):
 
     mean_matrix = np.zeros((np.shape(matrix)[0],np.shape(matrix)[1]))
@@ -75,8 +66,7 @@ def get_aligned_gradients(correlation_mean, correlation_matrix):
     ngradients = 4
     
     gm = GradientMaps(n_components=ngradients, kernel='gaussian', approach='dm', random_state=0).fit(correlation_mean)
-    #print(correlation_matrix[:,:,0])
-    #gm_emb = gm.fit(correlation_mean)
+
     #getting the gradient for individual subject and aligning with the average
     gp = GradientMaps(n_components=ngradients, kernel='gaussian',approach='dm', random_state=0,alignment='procrustes')
         
@@ -101,23 +91,24 @@ def get_aligned_gradients(correlation_mean, correlation_matrix):
     return gm,grad_aligned
 
 def get_mean_matrix(region,matrix_files):
-    #subj = ['3119','3120']
-    #matrix_dir = '/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/smoothed/corr_matrix/'+session
+
 
     matrix = np.load(matrix_files[0]) #np.load(matrix_dir+"/sub-"+subj[0]+"_"+session+"_corr-matrix.npy")
 
+    #Slicing the connectivity matrix of the first subject to get dimentions of each matrix
+    #The hardcoded numbers are unique to the atlas used
     if region=='ctx':
         sliced_matrix = matrix[:1000,:1000]
     if region=='sbctx_L':
         sliced_matrix = matrix[:500,1000:2923]
-        sliced_matrix= cosine_similarity(sliced_matrix.T, sliced_matrix.T)
+        sliced_matrix= cosine_similarity(sliced_matrix.T, sliced_matrix.T) #Getting the transpose because we want striatal voxels x striatal voxels
     if region=='sbctx_R':
         sliced_matrix = matrix[500:1000,2923:]
         sliced_matrix= cosine_similarity(sliced_matrix.T, sliced_matrix.T)
 
     cube_matrix = np.zeros((np.shape(sliced_matrix)[0],np.shape(sliced_matrix)[1],len(subj)))
 
-    
+    #Loop to combine each matrix into a 3D matrix called cube_matrix
     for i,matrix_file in enumerate(matrix_files):
         
         matrix = np.load(matrix_file) #np.load(matrix_dir+"/sub-"+subjects+"_"+session+"_corr-matrix.npy")
@@ -135,41 +126,21 @@ def get_mean_matrix(region,matrix_files):
 
         cube_matrix[:,:,i]=sliced_matrix
 
-    mean_data = np.mean(cube_matrix, axis=2)
-    #print(np.shape(mean_data))
+    mean_data = np.mean(cube_matrix, axis=2) #Getting the mean across subjects
 
-    mean_data[np.isnan(mean_data)] = 0
+    mean_data[np.isnan(mean_data)] = 0 #Replace nan values with 0
     cube_matrix[np.isnan(cube_matrix)] = 0
 
-    #mean_data[mean_data<0] = 0
-    #cube_matrix[cube_matrix<0] = 0
-    #mean_data = np.where(mean_data<0, 0, mean_data)
-    #cube_matrix = np.where(cube_matrix<0, 0, cube_matrix)
-
-    #mean_data = np.where(mean_data>1, 1.0, mean_data)
-    #cube_matrix = np.where(cube_matrix>1, 1.0, cube_matrix)
-    #mean_data = reject_outliers_2(cube_matrix, m=2.)
 
     return mean_data, cube_matrix
 
 
-"""#matrix_files_L_12 = []
-matrix_files_R_12 = []
-#matrix_files_L_24 = []
-matrix_files_R_24 = []
-
-for sub in subj:
-    #matrix_files_L_12.append('../../derivatives/analysis/structural/cortex/gradients/sub-'+sub+'_ses-Month12/L_matrix.npy')
-    matrix_files_R_12.append('../../derivatives/analysis/smoothed/corr_matrix/month12/sub-'+sub+'_month12_corr-matrix.npy')
-    #matrix_files_L_24.append('../../derivatives/analysis/structural/cortex/gradients/sub-'+sub+'_ses-Month24/L_matrix.npy')
-    matrix_files_R_24.append('../../derivatives/analysis/smoothed/corr_matrix/month24/sub-'+sub+'_month24_corr-matrix.npy')"""
-
 matrix_files_12 = snakemake.input.matrix_files_12
 matrix_files_24 = snakemake.input.matrix_files_24
-#month = snakemake.params.month
+
 make_out_dir(snakemake.params.grad_path)
 
-
+#Getting mean connectivity matrices for ctx and sbctx for both time points seperately
 mean_ctx_12, cube_matrix_ctx_12 = get_mean_matrix('ctx',matrix_files_12)
 mean_sbctx_L_12, cube_matrix_sbctx_L_12= get_mean_matrix('sbctx_L',matrix_files_12)
 mean_sbctx_R_12, cube_matrix_sbctx_R_12= get_mean_matrix('sbctx_R',matrix_files_12)
@@ -178,10 +149,12 @@ mean_ctx_24, cube_matrix_ctx_24 = get_mean_matrix('ctx',matrix_files_24)
 mean_sbctx_L_24, cube_matrix_sbctx_L_24= get_mean_matrix('sbctx_L',matrix_files_24)
 mean_sbctx_R_24, cube_matrix_sbctx_R_24= get_mean_matrix('sbctx_R',matrix_files_24)
 
+#combining m12 and m24 together and calculating a new mean
 mean_ctx = np.mean( np.array([mean_ctx_12, mean_ctx_24]), axis=0 )
 mean_sbctx_L = np.mean( np.array([mean_sbctx_L_12, mean_sbctx_L_24]), axis=0 )
 mean_sbctx_R = np.mean( np.array([mean_sbctx_R_12, mean_sbctx_R_24]), axis=0 )
 
+#Using that new mean to align each subject. LH and RH are aligned seperately
 grad_ctx_12, aligned_grad_ctx_12 = get_aligned_gradients(mean_ctx, cube_matrix_ctx_12)
 grad_sbctx_L_12, aligned_grad_sbctx_L_12 = get_aligned_gradients(mean_sbctx_L, cube_matrix_sbctx_L_12)
 grad_sbctx_R_12, aligned_grad_sbctx_R_12 = get_aligned_gradients(mean_sbctx_R, cube_matrix_sbctx_R_12)
@@ -192,7 +165,7 @@ grad_sbctx_R_24, aligned_grad_sbctx_R_24= get_aligned_gradients(mean_sbctx_R, cu
 
 
 
-# Save the file
+#Saving the files
 dill.dump(grad_ctx_12, file = open(snakemake.output.grad_ctx_12, "wb"))
 dill.dump(grad_sbctx_L_12, file = open(snakemake.output.grad_sbctx_L_12, "wb"))
 dill.dump(grad_sbctx_R_12, file = open(snakemake.output.grad_sbctx_R_12, "wb"))
@@ -208,23 +181,6 @@ dill.dump(aligned_grad_sbctx_L_24, file = open(snakemake.output.aligned_grad_sbc
 dill.dump(aligned_grad_sbctx_R_24, file = open(snakemake.output.aligned_grad_sbctx_R_24, "wb"))
 
 
-"""
-mean_ctx_24, cube_matrix_ctx_24 = get_mean_matrix('month24','ctx')
-mean_sbctx_L_24, cube_matrix_sbctx_L_24 = get_mean_matrix('month24','sbctx_L')
-mean_sbctx_R_24, cube_matrix_sbctx_R_24 = get_mean_matrix('month24','sbctx_R')
 
-grad_ctx_24, aligned_grad_ctx_24 = get_aligned_gradients(mean_ctx_24, cube_matrix_ctx_24)
-grad_sbctx_L_24, aligned_grad_sbctx_L_24 = get_aligned_gradients(mean_sbctx_L_24, cube_matrix_sbctx_L_24)
-grad_sbctx_R_24, aligned_grad_sbctx_R_24 = get_aligned_gradients(mean_sbctx_R_24, cube_matrix_sbctx_R_24)
-
-dill.dump(grad_ctx_24, file = open("/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/smoothed/gradients/bs_emb/emb_ctx_24.pickle", "wb"))
-dill.dump(grad_sbctx_L_24, file = open("/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/smoothed/gradients/bs_emb/emb_sbctx_L_24.pickle", "wb"))
-dill.dump(grad_sbctx_R_24, file = open("/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/smoothed/gradients/bs_emb/emb_sbctx_R_24.pickle", "wb"))
-dill.dump(aligned_grad_ctx_24, file = open("/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/smoothed/gradients/bs_emb/aligned_emb_ctx_24.pickle", "wb"))
-dill.dump(aligned_grad_sbctx_L_24, file = open("/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/smoothed/gradients/bs_emb/aligned_emb_sbctx_L_24.pickle", "wb"))
-dill.dump(aligned_grad_sbctx_R_24, file = open("/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/smoothed/gradients/bs_emb/aligned_emb_sbctx_R_24.pickle", "wb"))
-"""
-
-#add functionality to make bs_emb dir
 
 
