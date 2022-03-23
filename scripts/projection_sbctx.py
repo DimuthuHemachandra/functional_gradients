@@ -46,45 +46,60 @@ def make_out_dir(out_path):
 	          raise
 
 #projecting to cortex. Left and Right seperately 
+def make_out_dir(out_path):
+    
+    #Make subdirectories to save files
+    filename = out_path
+    if not os.path.exists(os.path.dirname(filename)):
+        try:
+            os.makedirs(os.path.dirname(filename))
+        except OSError as exc: # Guard against race condition
+            if exc.errno != errno.EEXIST:
+              raise
+
+#projecting to cortex. Left and Right seperately 
+
+def fill_array(mask_data,grad_array,low,up,roi):
+
+    sliced_array = grad_array[low:up]
+    mask_shape=np.shape(mask_data)
+    #print(np.shape(sliced_array))
+    q=0
+    for i in range(0,mask_shape[0]):
+        for j in range(0,mask_shape[1]):
+            for k in range(0,mask_shape[2]):
+                if mask_data[i,j,k] == roi:
+                    mask_data[i,j,k]= sliced_array[q]
+                    q=q+1   
+
+    return mask_data
 
 
 
 
 def get_sbctx_projections(grad_array,side,output_file):
-    atlas = nib.load(snakemake.params.greyordinates).get_fdata()
-    img = nib.load(snakemake.params.greyordinates)
-
-    true_vals = atlas[0]
+    
     
     if side =='R':
-        put_R = np.where(true_vals==51)
-        cau_R = np.where(true_vals==50)
-        acc_R = np.where(true_vals==58)
-
-        subctx_vals = np.concatenate((put_R, cau_R, acc_R),axis=1)
+        mask_data = nib.load(snakemake.params.str_rh).get_fdata()
+        img = nib.load(snakemake.params.str_rh)
+        mask_data = fill_array(mask_data,grad_array,0,1010,51)
+        mask_data = fill_array(mask_data,grad_array,1010,1765,50)
+        mask_data = fill_array(mask_data,grad_array,1765,1905,58)
+        final_img = nib.Nifti1Image(mask_data, img.affine, img.header)
+        nib.save(final_img,output_file)
 
     if side =='L':
-        put_L = np.where(true_vals==12)
-        cau_L = np.where(true_vals==11)
-        acc_L = np.where(true_vals==26)
+        mask_data = nib.load(snakemake.params.str_lh).get_fdata()
+        img = nib.load(snakemake.params.str_lh)
+        mask_data = fill_array(mask_data,grad_array,0,1060,12)
+        mask_data = fill_array(mask_data,grad_array,1060,1788,11)
+        mask_data = fill_array(mask_data,grad_array,1788,1923,26)
+        final_img = nib.Nifti1Image(mask_data, img.affine, img.header)
+        nib.save(final_img,output_file)
 
-        subctx_vals = np.concatenate((put_L, cau_L, acc_L),axis=1)
 
-    print(np.shape(true_vals))
-    print(np.shape(subctx_vals[0,:]))
-    sbctx_ind = subctx_vals[0,:]
-    for i, val  in enumerate(sbctx_ind):
-        true_vals[val]= grad_array[i] #*1000
 
-    for i, val in enumerate(true_vals):
-        #print(i)
-        if i not in sbctx_ind.tolist():
-            true_vals[i]= 0 #float("nan")
-
-    true_vals = true_vals.reshape(1,-1)
-    print(output_file)
-    new_img = nib.Cifti2Image(true_vals, img.header)
-    nib.save(new_img, output_file)
 
 
 #emb_dir ='/home/dimuthu1/scratch/PPMI_project2/derivatives/analysis/smoothed/gradients/bs_emb'

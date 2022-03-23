@@ -33,16 +33,14 @@ rule all:
         cleaned = expand(config['cleaned_dir']+'sub-{subject}_ses-{ses}_cleaned.dtseries.nii',subject=subjects,ses=sessions),
         smoothed = expand(config['analysis_dir']+'processed_dtseries/sub-{subject}_ses-{ses}_cleaned_smoothed.dtseries.nii',subject=subjects,ses=sessions),
         cor_matrix = expand(config['analysis_dir']+'corr_matrix/sub-{subject}_ses-{ses}_corr-matrix.npy',subject=subjects,ses=sessions),
-    	grad = expand([config['analysis_dir']+'gradients/bs_emb/emb_ctx_{ses}.pickle', config['analysis_dir']+'gradients/bs_emb/aligned_emb_ctx_{ses}.pickle', 
+        grad = expand([config['analysis_dir']+'gradients/bs_emb/emb_ctx_{ses}.pickle', config['analysis_dir']+'gradients/bs_emb/aligned_emb_ctx_{ses}.pickle', 
         config['analysis_dir']+ 'gradients/bs_emb/emb_sbctx_{hemi}_{ses}.pickle', config['analysis_dir']+'gradients/bs_emb/emb_sbctx_{hemi}_{ses}.pickle',
         config['analysis_dir']+'gradients/bs_emb/aligned_emb_sbctx_{hemi}_{ses}.pickle', config['analysis_dir']+'gradients/bs_emb/aligned_emb_sbctx_{hemi}_{ses}.pickle'],ses=sessions,hemi=hemis),
-        ctx = expand(config['analysis_dir']+'gradients/projections/cortex/sub-{subject}_ses-{ses}_ctx_{hemi}_aligned_grad.func.gii',subject=subjects,ses=sessions,hemi=hemis),
-        mean_ctx = expand(config['analysis_dir']+'gradients/projections/cortex/mean_{ses}_ctx_{hemi}_grad.func.gii',ses=sessions,hemi=hemis),
-        sbctx = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_ses-{ses}_sbctx_{hemi}_aligned_grad{componant}_image.dscalar.nii',subject=subjects,ses=sessions,hemi=hemis,componant=componants),
-        mean_sbctx = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/mean_{ses}_sbctx_{hemi}_grad{componant}_image.dscalar.nii',ses=sessions,hemi=hemis,componant=componants),
-        nii_all_files = expand(config['analysis_dir']+'gradients/projections/sbctx/nii/sub-{subject}_ses-{ses}_sbctx_{hemi}_aligned_grad{componant}_image.nii',subject=subjects, componant=componants, hemi=hemis, ses=sessions),
-        diff_grads = expand(config['analysis_dir']+'stats/grad1/LH/sub-{subject}_sbctx_LH_grad1_diff.nii.gz',subject=subjects),
-        concated_4d = config['analysis_dir']+'stats/grad1/LH/concatenated_diff_4D.nii'
+        sbctx = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_ses-{ses}_sbctx_{hemi}_aligned_grad{componant}_image.nii.gz',subject=subjects,ses=sessions,hemi=hemis,componant=componants),
+        mean_sbctx = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/mean_{ses}_sbctx_{hemi}_grad{componant}_image.nii.gz',ses=sessions,hemi=hemis,componant=componants),
+        #nii_all_files = expand(config['analysis_dir']+'gradients/projections/sbctx/nii/sub-{subject}_ses-{ses}_sbctx_{hemi}_aligned_grad{componant}_image.nii',subject=subjects, componant=componants, hemi=hemis, ses=sessions),
+        #diff_grads = expand(config['analysis_dir']+'stats/grad1/LH/sub-{subject}_sbctx_LH_grad1_diff.nii.gz',subject=subjects),
+        #concated_4d = config['analysis_dir']+'stats/grad1/LH/concatenated_diff_4D.nii'
 
 
     resources: 
@@ -186,12 +184,14 @@ rule get_sbctx_projection_month12:
             subjects = subjects,
             out_path = config['analysis_dir']+'gradients/projections/',
             labels = config['schaefer_1000_labels'],
-            greyordinates = config['greyordinates']
+            greyordinates = config['greyordinates'],
+            str_lh = config['str_lh'],
+            str_rh = config['str_rh']
           
-    output: sbctx_L = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_ses-Month12_sbctx_LH_aligned_grad{componant}_image.dscalar.nii',subject=subjects, componant=componants),
-            sbctx_R = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_ses-Month12_sbctx_RH_aligned_grad{componant}_image.dscalar.nii',subject=subjects, componant=componants),
-            sbctx_mean_L = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/mean_Month12_sbctx_LH_grad{componant}_image.dscalar.nii',componant=componants),
-            sbctx_mean_R = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/mean_Month12_sbctx_RH_grad{componant}_image.dscalar.nii',componant=componants)
+    output: sbctx_L = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_ses-Month12_sbctx_LH_aligned_grad{componant}_image.nii.gz',subject=subjects, componant=componants),
+            sbctx_R = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_ses-Month12_sbctx_RH_aligned_grad{componant}_image.nii.gz',subject=subjects, componant=componants),
+            sbctx_mean_L = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/mean_Month12_sbctx_LH_grad{componant}_image.nii.gz',componant=componants),
+            sbctx_mean_R = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/mean_Month12_sbctx_RH_grad{componant}_image.nii.gz',componant=componants)
             
 
     group: 'group'
@@ -210,12 +210,14 @@ rule get_sbctx_projection_month24:
             subjects = subjects,
             out_path = config['analysis_dir']+'gradients/projections/',
             labels = config['schaefer_1000_labels'],
-            greyordinates = config['greyordinates']
+            greyordinates = config['greyordinates'],
+            str_lh = config['str_lh'],
+            str_rh = config['str_rh']
           
-    output: sbctx_L = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_ses-Month24_sbctx_LH_aligned_grad{componant}_image.dscalar.nii',subject=subjects, componant=componants),
-            sbctx_R = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_ses-Month24_sbctx_RH_aligned_grad{componant}_image.dscalar.nii',subject=subjects, componant=componants),
-            sbctx_mean_L = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/mean_Month24_sbctx_LH_grad{componant}_image.dscalar.nii',componant=componants),
-            sbctx_mean_R = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/mean_Month24_sbctx_RH_grad{componant}_image.dscalar.nii',componant=componants)
+    output: sbctx_L = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_ses-Month24_sbctx_LH_aligned_grad{componant}_image.nii.gz',subject=subjects, componant=componants),
+            sbctx_R = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_ses-Month24_sbctx_RH_aligned_grad{componant}_image.nii.gz',subject=subjects, componant=componants),
+            sbctx_mean_L = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/mean_Month24_sbctx_LH_grad{componant}_image.nii.gz',componant=componants),
+            sbctx_mean_R = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/mean_Month24_sbctx_RH_grad{componant}_image.nii.gz',componant=componants)
             
 
     group: 'group'

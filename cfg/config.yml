@@ -24,6 +24,10 @@ atlas_label_txt: cfg/Schaefer2018_1000Parcels_7Networks_order_info.txt
 
 greyordinates: cfg/91282_Greyordinates.dscalar.nii
 
+str_lh: cfg/striatum_lh.nii.gz
+
+str_rh: cfg/striatum_rh.nii.gz
+
 
 
 
