@@ -42,11 +42,11 @@ def get_tstat(hemi, n):
     nib.save(image_diff_4D, out_path+'/concatenated_diff_4D.nii')
     os.system('randomise -i '+out_path+'/concatenated_diff_4D.nii -o '+out_path+'/OneSampT -1 -T')
 
-#get_tstat('RH', '1')
+get_tstat('RH', '1')
 #get_tstat('RH', '2')
 #get_tstat('RH', '3')
 
-get_tstat('LH', '1')
+#get_tstat('LH', '1')
 #get_tstat('LH', '2')
 #get_tstat('LH', '3')
 

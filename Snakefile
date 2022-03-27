@@ -36,11 +36,10 @@ rule all:
         grad = expand([config['analysis_dir']+'gradients/bs_emb/emb_ctx_{ses}.pickle', config['analysis_dir']+'gradients/bs_emb/aligned_emb_ctx_{ses}.pickle', 
         config['analysis_dir']+ 'gradients/bs_emb/emb_sbctx_{hemi}_{ses}.pickle', config['analysis_dir']+'gradients/bs_emb/emb_sbctx_{hemi}_{ses}.pickle',
         config['analysis_dir']+'gradients/bs_emb/aligned_emb_sbctx_{hemi}_{ses}.pickle', config['analysis_dir']+'gradients/bs_emb/aligned_emb_sbctx_{hemi}_{ses}.pickle'],ses=sessions,hemi=hemis),
-        sbctx = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_ses-{ses}_sbctx_{hemi}_aligned_grad{componant}_image.nii.gz',subject=subjects,ses=sessions,hemi=hemis,componant=componants),
-        mean_sbctx = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/mean_{ses}_sbctx_{hemi}_grad{componant}_image.nii.gz',ses=sessions,hemi=hemis,componant=componants),
-        #nii_all_files = expand(config['analysis_dir']+'gradients/projections/sbctx/nii/sub-{subject}_ses-{ses}_sbctx_{hemi}_aligned_grad{componant}_image.nii',subject=subjects, componant=componants, hemi=hemis, ses=sessions),
-        #diff_grads = expand(config['analysis_dir']+'stats/grad1/LH/sub-{subject}_sbctx_LH_grad1_diff.nii.gz',subject=subjects),
-        #concated_4d = config['analysis_dir']+'stats/grad1/LH/concatenated_diff_4D.nii'
+        sbctx = expand(config['analysis_dir']+'gradients/projections/sbctx/sub-{subject}_ses-{ses}_sbctx_{hemi}_aligned_grad{componant}_image.nii.gz',subject=subjects,ses=sessions,hemi=hemis,componant=componants),
+        mean_sbctx = expand(config['analysis_dir']+'gradients/projections/sbctx/mean_{ses}_sbctx_{hemi}_grad{componant}_image.nii.gz',ses=sessions,hemi=hemis,componant=componants),
+        diff_grads = expand(config['analysis_dir']+'stats/grad1/RH/sub-{subject}_sbctx_RH_grad1_diff.nii.gz',subject=subjects),
+        concated_4d = config['analysis_dir']+'stats/grad1/RH/concatenated_diff_4D.nii'
 
 
     resources: 
@@ -188,10 +187,10 @@ rule get_sbctx_projection_month12:
             str_lh = config['str_lh'],
             str_rh = config['str_rh']
           
-    output: sbctx_L = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_ses-Month12_sbctx_LH_aligned_grad{componant}_image.nii.gz',subject=subjects, componant=componants),
-            sbctx_R = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_ses-Month12_sbctx_RH_aligned_grad{componant}_image.nii.gz',subject=subjects, componant=componants),
-            sbctx_mean_L = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/mean_Month12_sbctx_LH_grad{componant}_image.nii.gz',componant=componants),
-            sbctx_mean_R = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/mean_Month12_sbctx_RH_grad{componant}_image.nii.gz',componant=componants)
+    output: sbctx_L = expand(config['analysis_dir']+'gradients/projections/sbctx/sub-{subject}_ses-Month12_sbctx_LH_aligned_grad{componant}_image.nii.gz',subject=subjects, componant=componants),
+            sbctx_R = expand(config['analysis_dir']+'gradients/projections/sbctx/sub-{subject}_ses-Month12_sbctx_RH_aligned_grad{componant}_image.nii.gz',subject=subjects, componant=componants),
+            sbctx_mean_L = expand(config['analysis_dir']+'gradients/projections/sbctx/mean_Month12_sbctx_LH_grad{componant}_image.nii.gz',componant=componants),
+            sbctx_mean_R = expand(config['analysis_dir']+'gradients/projections/sbctx/mean_Month12_sbctx_RH_grad{componant}_image.nii.gz',componant=componants)
             
 
     group: 'group'
@@ -214,10 +213,10 @@ rule get_sbctx_projection_month24:
             str_lh = config['str_lh'],
             str_rh = config['str_rh']
           
-    output: sbctx_L = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_ses-Month24_sbctx_LH_aligned_grad{componant}_image.nii.gz',subject=subjects, componant=componants),
-            sbctx_R = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_ses-Month24_sbctx_RH_aligned_grad{componant}_image.nii.gz',subject=subjects, componant=componants),
-            sbctx_mean_L = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/mean_Month24_sbctx_LH_grad{componant}_image.nii.gz',componant=componants),
-            sbctx_mean_R = expand(config['analysis_dir']+'gradients/projections/sbctx/cifti/mean_Month24_sbctx_RH_grad{componant}_image.nii.gz',componant=componants)
+    output: sbctx_L = expand(config['analysis_dir']+'gradients/projections/sbctx/sub-{subject}_ses-Month24_sbctx_LH_aligned_grad{componant}_image.nii.gz',subject=subjects, componant=componants),
+            sbctx_R = expand(config['analysis_dir']+'gradients/projections/sbctx/sub-{subject}_ses-Month24_sbctx_RH_aligned_grad{componant}_image.nii.gz',subject=subjects, componant=componants),
+            sbctx_mean_L = expand(config['analysis_dir']+'gradients/projections/sbctx/mean_Month24_sbctx_LH_grad{componant}_image.nii.gz',componant=componants),
+            sbctx_mean_R = expand(config['analysis_dir']+'gradients/projections/sbctx/mean_Month24_sbctx_RH_grad{componant}_image.nii.gz',componant=componants)
             
 
     group: 'group'
@@ -227,6 +226,26 @@ rule get_sbctx_projection_month24:
     script: 'scripts/projection_sbctx.py'
 
 
+
+
+
+rule t_test:
+    input: nii_files = expand(config['analysis_dir']+'gradients/projections/sbctx/sub-{subject}_ses-{ses}_sbctx_{hemi}_aligned_grad{componant}_image.nii.gz',subject=subjects, componant=componants, hemi=hemis, ses=sessions)
+    
+    params: out_path = config['analysis_dir']+'stats/'
+
+    output: diff_grad = expand(config['analysis_dir']+'stats/grad1/RH/sub-{subject}_sbctx_RH_grad1_diff.nii.gz',subject=subjects), 
+            nii_4D = config['analysis_dir']+'stats/grad1/RH/concatenated_diff_4D.nii',
+
+    group: 'stat'
+
+    resources: 
+            mem_mb = 8000, 
+            time = 240, #mins   
+               
+    script: 'scripts/t_stat.py'
+
+"""
 rule cii_to_nii: 
     input: nii_files = config['analysis_dir']+'gradients/projections/sbctx/cifti/sub-{subject}_ses-{ses}_sbctx_{hemi}_aligned_grad{componant}_image.dscalar.nii'
 
@@ -240,28 +259,8 @@ rule cii_to_nii:
     resources: time = 60, #30 mins
                
     shell: 'mkdir -p {params.out_path} && wb_command -cifti-separate {input.nii_files} COLUMN -volume-all {output.nii_out}'
-
-
-rule t_test:
-    input: nii_files = expand(config['analysis_dir']+'gradients/projections/sbctx/nii/sub-{subject}_ses-{ses}_sbctx_{hemi}_aligned_grad{componant}_image.nii',subject=subjects, componant=componants, hemi=hemis, ses=sessions)
-    
-    params: out_path = config['analysis_dir']+'stats/'
-
-    output: diff_grad = expand(config['analysis_dir']+'stats/grad1/LH/sub-{subject}_sbctx_LH_grad1_diff.nii.gz',subject=subjects), 
-            nii_4D = config['analysis_dir']+'stats/grad1/LH/concatenated_diff_4D.nii',
-
-    group: 'stat'
-
-    resources: 
-            mem_mb = 8000, 
-            time = 240, #mins   
-               
-    script: 'scripts/t_stat.py'
-
-
-
             
-
+"""
 
 
     
